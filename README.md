@@ -9,7 +9,7 @@ Authentication
     POST /api/register
     
 
-Input
+**Input**
 
 |   Name   |  Type  | Description |
 |:--------:|:------:|:-----------:|
@@ -18,7 +18,7 @@ Input
 
 
 
-Example
+**Example**
 
     {
         "message": "OK",
@@ -28,7 +28,9 @@ Example
                     "name": "Sid Sethupathi"
                 }
     }
-Response
+
+
+**Response**
 
 
     {

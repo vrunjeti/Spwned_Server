@@ -3,6 +3,8 @@ var mongoose = require('mongoose');
 
 var UserAccount = require('./models/UserAccount');
 var Admin = require('./models/Admin');
+var Player = require('./models/Player');
+var Kill = require('./models/Kill');
 
 var bodyParser = require('body-parser');
 var router = express.Router();
