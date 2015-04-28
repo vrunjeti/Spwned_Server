@@ -8,11 +8,14 @@ Registration
 	
     POST /api/register
     
+
 Input
+
 |   Name   |  Type  | Description |
 |:--------:|:------:|:-----------:|
-|   name   | string |   Required  |
-| password | string |   Required  |
+|   name   | string |   **Required** |
+| password | string |   **Required** |
+
 
 
 Example
