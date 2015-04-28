@@ -4,7 +4,7 @@ Backend for Spwned, CS498RK Final Project
 Authentication
 =============
 
-Registration
+### Registration
 	
     POST /api/register
     
