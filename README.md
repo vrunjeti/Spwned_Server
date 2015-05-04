@@ -5,39 +5,33 @@ Authentication
 =============
 
 ### Registration
-	
+    
     POST /api/register
     
 
 **Input**
 
-|   Name   |  Type  | Description |
-|:--------:|:------:|:-----------:|
-|   name   | string |   **Required** |
-| password | string |   **Required** |
-
-
-
-**Example**
-
-    {
-        "message": "OK",
-        "data": {
-                    "_id": "55099652e5993a350458b7b7",
-                    "email": "sid.sethupathi@gmail.com",
-                    "name": "Sid Sethupathi"
-                }
-    }
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+|   username   | string |   **Required** | PSICaramel
+| firstname | string |   **Required** | Alex
+| lastname | string |   **Required** | Duh
+| email | string |   **Required** | ripped@math.com
+| password | string |   **Required** | luigi1234
 
 
 **Response**
 
-
     {
         "message": "OK",
         "data": {
-                    "_id": "55099652e5993a350458b7b7",
-                    "email": "sid.sethupathi@gmail.com",
-                    "name": "Sid Sethupathi"
-                }
+            "__v": 0,
+            "username": "PSICaramel",
+            "firstname": "Alex",
+            "lastname": "Duh",
+            "email": "ripped@math.com",
+            "password": "$2a$10$gg4Gt7E8yNAYNQipFgS8seuuEKRWNkk7K8Npnho5UMklDabHLiTwW",
+            "_id": "554805f504331bad19972f81",
+            "dateCreated": "2015-05-04T23:51:17.863Z"
+        }
     }

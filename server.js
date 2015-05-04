@@ -5,6 +5,8 @@ var UserAccount = require('./models/UserAccount');
 var Admin = require('./models/Admin');
 var Player = require('./models/Player');
 var Kill = require('./models/Kill');
+var Message = require('./models/Message');
+var Game = require('./models/Game');
 
 var bodyParser = require('body-parser');
 var router = express.Router();
@@ -44,8 +46,57 @@ app.use('/api', router);
 var homeRoute = router.route('/');
 
 homeRoute.get(function(req, res) {
-  res.json({ message: 'Hello Spwned!' });
+	res.json(jsonBody("Check if mongo has connected","Hello Spwned"));
 });
+
+var registerRoute = router.route('/register');
+
+registerRoute.options(function(req, res) {
+  res.writeHead(200);
+  res.end();
+});
+
+function isRegisterValid(req) {
+	body = req.body;
+	if (body.username=='' || body.username==null || body.password=='' || body.password == null || 
+		body.email=='' || body.email == null|| body.firstname == '' || body.firstname == null ||
+		body.lastname == '' || body.lastname == null) {
+		return false;
+	}
+	return true;
+}
+
+function jsonBody(msg,info) {
+	return {message: msg, data: info};
+}
+
+registerRoute.post(function(req, res){
+	if (!isRegisterValid(req)) {
+		res.status(404).json(jsonBody("404 Error","Invalid Input"));
+		return;
+	}
+	newUserAccount = new UserAccount(body);
+	newUserAccount.save(function (err) {
+	    if(err) {
+	   		res.status(404).json({message: "404 Error", data: "Email already exists"});
+	    }
+	    else {
+	    	res.status(201).json({'message':'OK','data':newUserAccount});
+	    	UserAccount.findOne({ username: 'niklnarph' }, function(err, user) {
+	    		//testing password match - remove soon
+    if (err) throw err;
+ 
+    // will delete soon
+    user.comparePassword('rippedrinat415', function(err, isMatch) {
+        if (err) throw err;
+        console.log('Password123:', isMatch); // -&gt; Password123: true
+    	});
+	});
+
+	    }
+	});
+});
+
 
 app.listen(port);
 console.log('Server running on port ' + port); 
