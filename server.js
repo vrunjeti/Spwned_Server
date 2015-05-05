@@ -31,36 +31,41 @@ var app = express();
 var port = process.env.PORT || 4000;
 
 var allowCrossDomain = function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept");
-  next();
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept");
+	next();
 };
 app.use(allowCrossDomain);
 
 app.use(bodyParser.urlencoded({
-  extended: true
+	extended: true
 }));
 
 app.use('/api', router);
 
+//API Routes
 var homeRoute = router.route('/');
+var registerRoute = router.route('/register');
+var signinRoute = router.route('/signin');
+//API Routes
 
 homeRoute.get(function(req, res) {
 	res.json(jsonBody("Check if mongo has connected","Hello Spwned"));
 });
 
-var registerRoute = router.route('/register');
-
-registerRoute.options(function(req, res) {
-  res.writeHead(200);
-  res.end();
-});
-
 function isRegisterValid(req) {
 	body = req.body;
-	if (body.username=='' || body.username==null || body.password=='' || body.password == null || 
-		body.email=='' || body.email == null|| body.firstname == '' || body.firstname == null ||
+	if (body.password=='' || body.password == null || body.email=='' || 
+		body.email == null|| body.firstname == '' || body.firstname == null ||
 		body.lastname == '' || body.lastname == null) {
+		return false;
+	}
+	return true;
+}
+
+function isSignInValid(req) {
+	body = req.body;
+	if (body.password=='' || body.password == null || body.email=='' || body.email == null) {
 		return false;
 	}
 	return true;
@@ -70,6 +75,11 @@ function jsonBody(msg,info) {
 	return {message: msg, data: info};
 }
 
+registerRoute.options(function(req, res) {
+	res.writeHead(200);
+	res.end();
+});
+
 registerRoute.post(function(req, res){
 	if (!isRegisterValid(req)) {
 		res.status(404).json(jsonBody("404 Error","Invalid Input"));
@@ -77,26 +87,47 @@ registerRoute.post(function(req, res){
 	}
 	newUserAccount = new UserAccount(body);
 	newUserAccount.save(function (err) {
-	    if(err) {
-	   		res.status(404).json({message: "404 Error", data: "Email already exists"});
-	    }
-	    else {
-	    	res.status(201).json({'message':'OK','data':newUserAccount});
-	    	UserAccount.findOne({ username: 'niklnarph' }, function(err, user) {
-	    		//testing password match - remove soon
-    if (err) throw err;
- 
-    // will delete soon
-    user.comparePassword('rippedrinat415', function(err, isMatch) {
-        if (err) throw err;
-        console.log('Password123:', isMatch); // -&gt; Password123: true
-    	});
-	});
-
-	    }
+		if(err) {
+			res.status(404).json(jsonBody("404 Error","Email Already Exists"));
+		}
+		else {
+			res.status(201).json(jsonBody("register OK",newUserAccount));
+		}
 	});
 });
 
+signinRoute.options(function(req, res) {
+	res.writeHead(200);
+	res.end();
+});
+
+signinRoute.post(function(req, res){
+	body = req.body;
+	if (!isSignInValid(req)) {
+		res.status(404).json(jsonBody("404 Error","Invalid Credentials"));
+		return;
+	}
+	UserAccount.findOne({ email: body.email }, function(err, user) {
+		if (err) {
+			res.status(404).json(jsonBody("404 Error","Email not in System"));
+		}
+		else {
+			user.comparePassword(body.password, function(err, isMatch) {
+				if (err){
+					res.status(404).json(jsonBody("404 Error","System Error Please Try Again"));
+				}
+				else {
+	        		if (isMatch) {
+	        			res.status(201).json(jsonBody("signin OK",user));
+	        		}
+	        		else {
+						res.status(404).json(jsonBody("404 Error","Invalid Password"));
+	        		}
+	        	} 
+	    	});
+		}
+	});
+});
 
 app.listen(port);
 console.log('Server running on port ' + port); 
