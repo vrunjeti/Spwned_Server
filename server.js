@@ -47,6 +47,7 @@ app.use('/api', router);
 var homeRoute = router.route('/');
 var registerRoute = router.route('/register');
 var signinRoute = router.route('/signin');
+var gameRoute = router.route('/game');
 //API Routes
 
 homeRoute.get(function(req, res) {
@@ -128,6 +129,59 @@ signinRoute.post(function(req, res){
 		}
 	});
 });
+
+gameRoute.options(function(req, res) {
+	res.writeHead(200);
+	res.end();
+});
+
+gameRoute.get(function(req, res) {
+	req.query.where ? conditions = JSON.parse(req.query.where) : conditions = null;
+	req.query.select ? fields = JSON.parse(req.query.select) : fields = null;
+  	var options = {
+	    sort: null,
+	    skip: null,
+	    limit: null
+  	};
+	req.query.sort ? options['sort'] = JSON.parse(req.query.sort) : options['sort']  = null;
+	req.query.skip ? options['skip'] = JSON.parse(req.query.skip) : options['skip']  = null;
+	req.query.limit ? options['limit'] = JSON.parse(req.query.limit) : options['limit']  = null;
+
+	req.query.count ? countBool = JSON.parse(req.query.count) : countBool  = false;
+
+	if (countBool === true) {	
+		Game.count({}, function( err, count){
+		    res.status(200).json({message: "OK", data: count}); 
+		});	
+	}
+	else {
+		Game.find(conditions, fields, options, function(err, games) {
+		    if (err) {
+		      res.status(404).json({message: "404 Error", data: err});
+		      return;
+		    }
+		    res.status(200).json({message: "game list OK", data: games}); 
+		});	
+	}
+});
+
+gameRoute.post(function(req, res){
+	body = req.body;
+	if (false) {
+		res.status(404).json(jsonBody("404 Error","Invalid Input"));
+		return;
+	}
+	newGame = new Game(body);
+	newGame.save(function (err) {
+		if(err) {
+			res.status(404).json(jsonBody("404 Error",err));
+		}
+		else {
+			res.status(201).json(jsonBody("game creation OK",newGame));
+		}
+	});
+});
+
 
 app.listen(port);
 console.log('Server running on port ' + port); 

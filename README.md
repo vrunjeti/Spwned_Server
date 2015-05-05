@@ -61,3 +61,85 @@ Authentication
             "dateCreated": "2015-05-05T06:23:28.680Z"
         }
     }
+
+Game - TODO
+=============
+
+### Game List
+    
+    GET /api/game
+    
+**Response**
+
+    {
+        TBD
+    }
+    
+### Create Game
+    
+    POST /api/game
+    
+
+**Input**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| title | string |   **Required** | Brawl Related Spwned
+| description | string |   **Required** | Kill your enemies with GCN Controllers
+| admin_id | string |   **Required** | 554861e03f4f26151c70843d 
+| start_date | string |   **Required** | TBD
+| end_date | string |   **Required** | TBD
+| capacity | number |   **Required** | 15
+
+
+**Response**
+
+    {
+        TBD
+    }
+    
+### Delete Game
+    
+    DELETE /api/game
+    
+
+**Input**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| - | - |   No Expected Inputs  | -
+
+
+
+**Response**
+
+    {
+        TBD
+    }
+    
+### Game Info
+    
+    GET /api/game/:id
+    
+**Response**
+
+    {
+        TBD
+    }
+    
+### Join Game
+    
+    POST /api/game/:id
+    
+
+**Input**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| user_id | string |   **Required** | 554861e03f4f26151c70843d 
+
+**Response**
+
+    {
+        TBD
+    }

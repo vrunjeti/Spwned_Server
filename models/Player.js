@@ -5,7 +5,7 @@ var PlayerSchema = new mongoose.Schema({
 	killer: {type: Schema.Types.ObjectId, ref:'Player'},
 	killed: [{type: Schema.Types.ObjectId, ref:'Kill'}],
 	isAlive: {type: Boolean, default: true},
-	userId: {type: Schema.Types.ObjectId, required: true, ref:'UserAccount'},
+	user_id: {type: Schema.Types.ObjectId, required: true, ref:'UserAccount'},
 	dateCreated: {type: Date, default: Date.now},
 });
 
