@@ -57,8 +57,8 @@ homeRoute.get(function(req, res) {
 function isRegisterValid(req) {
 	body = req.body;
 	if (body.password=='' || body.password == null || body.email=='' || 
-		body.email == null|| body.firstname == '' || body.firstname == null ||
-		body.lastname == '' || body.lastname == null) {
+		body.email == null|| body.first_name == '' || body.first_name == null ||
+		body.last_name == '' || body.last_name == null) {
 		return false;
 	}
 	return true;

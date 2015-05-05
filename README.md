@@ -13,8 +13,8 @@ Authentication
 
 |   Name   |  Type  | Description | Example |
 |:--------:|:------:|:-----------:|:-----------:|
-| firstname | string |   **Required** | Alex
-| lastname | string |   **Required** | Duh
+| first_name | string |   **Required** | Alex
+| last_name | string |   **Required** | Duh
 | email | string |   **Required** | ripped@math.com
 | password | string |   **Required** | luigi1234
 
@@ -25,12 +25,12 @@ Authentication
         "message": "register OK",
         "data": {
             "__v": 0,
-            "firstname": "Alex",
-            "lastname": "Duh",
+            "first_name": "Alex",
+            "last_name": "Duh",
             "email": "ripped@math.com",
-            "password": "$2a$10$gg4Gt7E8yNAYNQipFgS8seuuEKRWNkk7K8Npnho5UMklDabHLiTwW",
-            "_id": "554805f504331bad19972f81",
-            "dateCreated": "2015-05-04T23:51:17.863Z"
+            "password": "$2a$10$.ykPNx3Gq/rcAAuQtjHmIu8roUIS03vjgExKeK4HWSakUJOxlp0LS",
+            "_id": "55487085a0608480245f0693",
+            "dateCreated": "2015-05-05T07:25:57.186Z"
         }
     }
 
@@ -52,13 +52,13 @@ Authentication
     {
         "message": "signin OK",
         "data": {
-            "_id": "554861e03f4f26151c70843d",
-            "firstname": "Alex",
-            "lastname": "Duh",
+            "_id": "55487085a0608480245f0693",
+            "first_name": "Alex",
+            "last_name": "Duh",
             "email": "ripped@math.com",
-            "password": "$2a$10$6dGMUplL6.zb7qWwYp7pQ.dzwwTFeljgDCPMerYh7.K.u9wjle81i",
+            "password": "$2a$10$.ykPNx3Gq/rcAAuQtjHmIu8roUIS03vjgExKeK4HWSakUJOxlp0LS",
             "__v": 0,
-            "dateCreated": "2015-05-05T06:23:28.680Z"
+            "dateCreated": "2015-05-05T07:25:57.186Z"
         }
     }
 
@@ -98,24 +98,6 @@ Game - TODO
         TBD
     }
     
-### Delete Game
-    
-    DELETE /api/game
-    
-
-**Input**
-
-|   Name   |  Type  | Description | Example |
-|:--------:|:------:|:-----------:|:-----------:|
-| - | - |   No Expected Inputs  | -
-
-
-
-**Response**
-
-    {
-        TBD
-    }
     
 ### Game Info
     
@@ -137,6 +119,25 @@ Game - TODO
 |   Name   |  Type  | Description | Example |
 |:--------:|:------:|:-----------:|:-----------:|
 | user_id | string |   **Required** | 554861e03f4f26151c70843d 
+
+**Response**
+
+    {
+        TBD
+    }
+
+### Delete Game
+    
+    DELETE /api/game/:id
+    
+
+**Input**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| - | - |   No Expected Inputs  | -
+
+
 
 **Response**
 
