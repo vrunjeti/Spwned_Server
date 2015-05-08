@@ -51,6 +51,8 @@ var gameRoute = router.route('/game');
 var gameIDRoute = router.route('/game/:id');
 var gameJoinRoute = router.route('/game/:id/join');
 var gameStartRoute = router.route('/game/:id/start');
+var playerRoute = router.route('/player');
+var playerIDRoute = router.route('/player/:id');
 //API Routes
 
 homeRoute.get(function(req, res) {
@@ -88,6 +90,7 @@ function findDuplicateUser(user_id,game) {
 	return true;
 }
 
+/*AUTHENTICATION */
 registerRoute.options(function(req, res) {
 	res.writeHead(200);
 	res.end();
@@ -142,6 +145,8 @@ signinRoute.post(function(req, res){
 	});
 });
 
+/*GAME */
+
 gameRoute.options(function(req, res) {
 	res.writeHead(200);
 	res.end();
@@ -149,16 +154,6 @@ gameRoute.options(function(req, res) {
 
 gameRoute.get(function(req, res) {
 	req.query.where ? conditions = JSON.parse(req.query.where) : conditions = null;
-	req.query.select ? fields = JSON.parse(req.query.select) : fields = null;
-  	var options = {
-	    sort: null,
-	    skip: null,
-	    limit: null
-  	};
-	req.query.sort ? options['sort'] = JSON.parse(req.query.sort) : options['sort']  = null;
-	req.query.skip ? options['skip'] = JSON.parse(req.query.skip) : options['skip']  = null;
-	req.query.limit ? options['limit'] = JSON.parse(req.query.limit) : options['limit']  = null;
-
 	req.query.count ? countBool = JSON.parse(req.query.count) : countBool  = false;
 
 	if (countBool === true) {	
@@ -167,7 +162,7 @@ gameRoute.get(function(req, res) {
 		});	
 	}
 	else {
-		Game.find(conditions, fields, options, function(err, games) {
+		Game.find(conditions, null, null, function(err, games) {
 		    if (err) {
 		      res.status(404).json({message: "404 Error", data: err});
 		      return;
@@ -225,11 +220,12 @@ gameJoinRoute.put(function(req, res) {
 	    			return;
 	    		}
 	    		else {
-	    			newPlayer = new Player({user_id:body.user_id});
+	    			newPlayer = new Player({user_id:body.user_id,game_id:game._id});
 	    			game.players.push(newPlayer);
+	    			newPlayer.save();
 	    			game.save(function(err) {
 	    				if (err) {
-			    			res.status(404).json(jsonBody("505 Error",err));
+			    			res.status(505).json(jsonBody("505 Error",err));
 			    		}
 	    				else {
 	    					user.games.push(mongoose.Types.ObjectId(game._id));
@@ -244,6 +240,25 @@ gameJoinRoute.put(function(req, res) {
 	});
 });
 
+function prepareGame(game) {
+	players = game.players;
+	len = players.length;
+	target = 1;
+	for(i = 0; i < len; i++) {
+		//console.log(players[i]);
+		players[i].target = mongoose.Types.ObjectId(players[target]._id);
+		//console.log("targeting:"+target);
+		target++;
+		if (target == len)
+			target = 0;
+	}
+	return players;
+	console.log(players);
+	game.players = players;
+	console.log(game.players);
+	return game;
+}
+
 gameStartRoute.put(function(req, res) {
 	body = req.body;
 	Game.findById(req.params.id, function(err, game) {
@@ -252,14 +267,49 @@ gameStartRoute.put(function(req, res) {
 	    	return;
 	    }
 	    else {
-	    	//TODO
-	    	console.log("game start PUT needs LOGIC HERE");
+	    	game.players = prepareGame(game);
+	    	game.markModified('players');
+	    	game.hasStarted = true;
+	    	game.save();
 			info = {game_id:game._id,};
 	    	res.status(200).json(jsonBody('game start OK',info));
 	    }
-	});
+	});	
 });
 
+
+/*PLAYER */
+playerRoute.get(function(req, res) {
+	req.query.where ? conditions = JSON.parse(req.query.where) : conditions = null;
+	req.query.count ? countBool = JSON.parse(req.query.count) : countBool  = false;
+
+	if (countBool === true) {	
+		Player.count({}, function( err, count){
+		    res.status(200).json({message: "OK", data: count}); 
+		});	
+	}
+	else {
+		Player.find(conditions, null, null, function(err, players) {
+		    if (err) {
+		      res.status(404).json({message: "404 Error", data: err});
+		      return;
+		    }
+		    res.status(200).json({message: "player list OK", data: players}); 
+		});	
+	}
+});
+
+playerIDRoute.get(function(req, res) {
+	Player.findById(req.params.id, function(err, target) {
+	    if (err || !target) {
+	    	res.status(404).json(jsonBody("404 Error","Could not find Player"));
+	    	return;
+	    }
+	    else {
+			res.status(200).json(jsonBody('player ID OK',target));
+		}
+	});
+});
 
 app.listen(port);
 console.log('Server running on port ' + port); 
