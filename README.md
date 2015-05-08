@@ -1,7 +1,7 @@
 # Spwned_Server
 Backend for Spwned, CS498RK Final Project
 
-- [Settingup](#settingup)
+- [Setting Up](#setting-up)
 - [Authentication](#authentication)
   - [Registration](#registration)
   - [Sign In](#sign-in)
