@@ -53,6 +53,7 @@ var gameJoinRoute = router.route('/game/:id/join');
 var gameStartRoute = router.route('/game/:id/start');
 var playerRoute = router.route('/player');
 var playerIDRoute = router.route('/player/:id');
+var playerReportRoute = router.route('/player/:id/report');
 //API Routes
 
 homeRoute.get(function(req, res) {
@@ -88,6 +89,17 @@ function findDuplicateUser(user_id,game) {
 			return false;
 	}
 	return true;
+}
+
+function makeSecretCode()
+{
+    var secret = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    for( var i=0; i < 4; i++ )
+        secret += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return secret;
 }
 
 /*AUTHENTICATION */
@@ -220,8 +232,8 @@ gameJoinRoute.put(function(req, res) {
 	    			return;
 	    		}
 	    		else {
-	    			newPlayer = new Player({user_id:body.user_id,game_id:game._id});
-	    			game.players.push(newPlayer);
+	    			newPlayer = new Player({user_id:body.user_id,game_id:game._id,secret_code:makeSecretCode()});
+	    			game.players.push(mongoose.Types.ObjectId(newPlayer._id));
 	    			newPlayer.save();
 	    			game.save(function(err) {
 	    				if (err) {
@@ -240,35 +252,42 @@ gameJoinRoute.put(function(req, res) {
 	});
 });
 
+function setTargetForPlayer(player_id,target_id) {
+	Player.findById(player_id, function(err, player) {
+	    if (err || !player) {
+	    	res.status(505).json(jsonBody("505 Error",err));
+	    	return;
+	    }
+	    else {
+	    	player.target_id = mongoose.Types.ObjectId(target_id);
+	    	player.save();
+		}
+	});
+}
+
 function prepareGame(game) {
 	players = game.players;
 	len = players.length;
 	target = 1;
 	for(i = 0; i < len; i++) {
-		//console.log(players[i]);
-		players[i].target = mongoose.Types.ObjectId(players[target]._id);
-		//console.log("targeting:"+target);
+		setTargetForPlayer(players[i],players[target]);
 		target++;
 		if (target == len)
 			target = 0;
 	}
 	return players;
-	console.log(players);
-	game.players = players;
-	console.log(game.players);
-	return game;
 }
 
 gameStartRoute.put(function(req, res) {
 	body = req.body;
 	Game.findById(req.params.id, function(err, game) {
 	    if (err || !game) {
-	    	res.status(404).json({'message':'404 Error','data':'Game ID does not exist'});
+	    	res.status(404).json(jsonBody('404 Error','Game ID does not exist'));
 	    	return;
 	    }
 	    else {
-	    	game.players = prepareGame(game);
-	    	game.markModified('players');
+	    	prepareGame(game);
+	    	//game.markModified('players');
 	    	game.hasStarted = true;
 	    	game.save();
 			info = {game_id:game._id,};
@@ -291,10 +310,10 @@ playerRoute.get(function(req, res) {
 	else {
 		Player.find(conditions, null, null, function(err, players) {
 		    if (err) {
-		      res.status(404).json({message: "404 Error", data: err});
+		      res.status(404).json(jsonBody('404 Error',err));
 		      return;
 		    }
-		    res.status(200).json({message: "player list OK", data: players}); 
+		   	res.status(200).json(jsonBody('player list OK',players));
 		});	
 	}
 });
@@ -310,6 +329,45 @@ playerIDRoute.get(function(req, res) {
 		}
 	});
 });
+
+playerReportRoute.put(function(req, res) {
+	body = req.body;
+	Player.findById(req.params.id, function(err, killer) {
+	    if (err || !killer) {
+	    	console.log(err);
+	    	res.status(404).json(jsonBody("404 Error","Could not find Killer"));
+	    	return;
+	    }
+	    else {
+	    	target_id = killer.target_id;
+	    	Player.findById(target_id, function(err, targetPlayer) {
+	    		if (err || !targetPlayer) {
+	    			res.status(404).json(jsonBody("404 Error","Could not find Target"));
+			    	return;
+	    		}
+	    		else if (targetPlayer.secret_code == body.secret_code) {
+	    			targetPlayer.isAlive = false;
+	    			killer_id = mongoose.Types.ObjectId(killer._id);
+	    			target_id = mongoose.Types.ObjectId(targetPlayer._id);
+	    			targetPlayer.killer_id = killer_id;
+	    			//targetPlayer.game_id = killer.game_id;
+	    			targetPlayer.save();
+	       			newKill = new Kill({killer_id:killer_id,target_id:target_id,game_id:killer.game_id});
+	       			newKill.save();
+	    			killer.killed.push(mongoose.Types.ObjectId(newKill._id));
+	    			killer.markModified('killed');
+	    			killer.save();
+					res.status(200).json(jsonBody('player Report OK',newKill));
+	    		}
+	    		else {
+			    	res.status(404).json(jsonBody("404 Error","Secret Code Invalid"));
+			    	return;
+	    		}
+	    	});
+	    }
+	});	
+});
+
 
 app.listen(port);
 console.log('Server running on port ' + port); 

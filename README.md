@@ -14,7 +14,7 @@ Backend for Spwned, CS498RK Final Project
 - [Player](#player)
   - [Player List](#player-list)
   - [Specific Player](#specific-player)
-
+  - [Report Kill](#report-kill)
  
 Authentication
 =============
@@ -279,19 +279,37 @@ Player
         "message": "player list OK",
         "data": [
             {
-                "_id": "554cdaea7685f0154f471807",
-                "user_id": "554cd2279f6de9303d1a4310",
-                "game_id": "554ab75a9dfab5b206f15cdd",
-                "__v": 0,
-                "dateCreated": "2015-05-08T15:48:58.732Z",
+                "_id": "554d1e383bad7b454a9a7259",
+                "user_id": "55487085a0608480245f0693",
+                "game_id": "554d1e0d3bad7b454a9a7258",
+                "__v": 4,
+                "dateCreated": "2015-05-08T20:36:08.361Z",
+                "secret_code": "HI8H",
                 "isAlive": true,
+                "killed": [
+                    "554d20f7da2240bf507c6dc9",
+                    "554d212fda2240bf507c6dca",
+                    "554d21e0e9c013ba522df532",
+                    "554d21e7e9c013ba522df533"
+                ],
+                "killer_id": null,
+                "target_id": "554d1e433bad7b454a9a725a"
+            },
+            {
+                "_id": "554d1e433bad7b454a9a725a",
+                "user_id": "554cd2279f6de9303d1a4310",
+                "game_id": "554d1e0d3bad7b454a9a7258",
+                "__v": 0,
+                "dateCreated": "2015-05-08T20:36:19.212Z",
+                "secret_code": "GYPB",
+                "isAlive": false,
                 "killed": [],
-                "killer": null,
-                "target": null
+                "killer_id": "554d1e383bad7b454a9a7259",
+                "target_id": "554d1e383bad7b454a9a7259"
             }
         ]
     }
-   
+
 ### Specific Player
     
     GET /api/player/:id
@@ -307,14 +325,44 @@ Player
     {
         "message": "player ID OK",
         "data": {
-            "_id": "554cdaea7685f0154f471807",
-            "user_id": "554cd2279f6de9303d1a4310",
-            "game_id": "554ab75a9dfab5b206f15cdd",
-            "__v": 0,
-            "dateCreated": "2015-05-08T15:48:58.732Z",
+            "_id": "554d1e383bad7b454a9a7259",
+            "user_id": "55487085a0608480245f0693",
+            "game_id": "554d1e0d3bad7b454a9a7258",
+            "__v": 4,
+            "dateCreated": "2015-05-08T20:36:08.361Z",
+            "secret_code": "HI8H",
             "isAlive": true,
-            "killed": [],
-            "killer": null,
-            "target": null
+            "killed": [
+                "554d20f7da2240bf507c6dc9",
+                "554d212fda2240bf507c6dca",
+                "554d21e0e9c013ba522df532",
+                "554d21e7e9c013ba522df533"
+            ],
+            "killer_id": null,
+            "target_id": "554d1e433bad7b454a9a725a"
+        }
+    }
+
+### Report Kill
+    
+    PUT /api/player/:id/report
+    
+**Supported Parameters**
+
+|   Name   | Description | Example |
+|:--------:| :-----------:|:-----------:|
+| secret_code |string|GYPB
+    
+**Response**
+
+    {
+        "message": "player Report OK",
+        "data": {
+            "killer_id": "554d1e383bad7b454a9a7259",
+            "target_id": "554d1e433bad7b454a9a725a",
+            "game_id": "554d1e0d3bad7b454a9a7258",
+            "_id": "554d21e7e9c013ba522df533",
+            "dateCreated": "2015-05-08T20:51:51.759Z",
+            "timeOfKill": "2015-05-08T20:51:51.759Z"
         }
     }
