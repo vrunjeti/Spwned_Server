@@ -1,6 +1,18 @@
 # Spwned_Server
 Backend for Spwned, CS498RK Final Project
 
+- [Authentication](#authentication)
+  - [Registration](#registration)
+  - [Sign In](#sign-in)
+- [Game](#game)
+  - [Game List](#game-list)
+  - [Specific Game](#specific-game)
+  - [Create Game](#create-game)
+  - [Join Game](#join-game)
+  - [Start Game](#start-game)
+  - [Delete Game](#delete-game)
+ 
+ 
 Authentication
 =============
 
