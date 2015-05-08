@@ -11,7 +11,10 @@ Backend for Spwned, CS498RK Final Project
   - [Join Game](#join-game)
   - [Start Game](#start-game)
   - [Delete Game](#delete-game)
- 
+- [Player](#player)
+  - [Player List](#player-list)
+  - [Specific Player](#specific-player)
+
  
 Authentication
 =============
@@ -69,7 +72,10 @@ Authentication
             "last_name": "Duh",
             "email": "ripped@math.com",
             "password": "$2a$10$.ykPNx3Gq/rcAAuQtjHmIu8roUIS03vjgExKeK4HWSakUJOxlp0LS",
-            "__v": 0,
+            "__v": 1,
+            "games": [
+                "554ab75a9dfab5b206f15cdd"
+            ],
             "dateCreated": "2015-05-05T07:25:57.186Z"
         }
     }
@@ -124,44 +130,6 @@ Game
         ]
     }
     
-### Specific Game
-    
-    GET /api/game/:id
-    
-**Supported Parameters**
-
-|   Name   | Description | Example |
-|:--------:| :-----------:|:-----------:|
-| none |none|none
-    
-**Response**
-
-    {
-        "message": "game ID OK",
-        "data": {
-            "_id": "554ab75a9dfab5b206f15cdd",
-            "admin_id": "55487085a0608480245f0693",
-            "start_date": "1970-01-01T00:00:01.234Z",
-            "end_date": "1970-01-01T00:00:01.234Z",
-            "capacity": 15,
-            "title": "Brawl Related Spwned",
-            "description": "Kill your enemies with GCN Controllers",
-            "__v": 6,
-            "dateCreated": "2015-05-07T00:52:42.760Z",
-            "messages": [],
-            "all_kills": [],
-            "players": [
-                {
-                    "killed": [],
-                    "isAlive": true,
-                    "dateCreated": "2015-05-08T04:37:45.815Z",
-                    "_id": "554c3d9980f70334099d27b9",
-                    "user_id": "55487085a0608480245f0693"
-                }
-            ]
-        }
-    }
-    
 ### Create Game
     
     POST /api/game
@@ -199,7 +167,43 @@ Game
         }
     }
     
+### Specific Game
     
+    GET /api/game/:id
+    
+**Supported Parameters**
+
+|   Name   | Description | Example |
+|:--------:| :-----------:|:-----------:|
+| none |none|none
+    
+**Response**
+
+    {
+        "message": "game ID OK",
+        "data": {
+            "_id": "554ab75a9dfab5b206f15cdd",
+            "admin_id": "55487085a0608480245f0693",
+            "start_date": "1970-01-01T00:00:01.234Z",
+            "end_date": "1970-01-01T00:00:01.234Z",
+            "capacity": 15,
+            "title": "Brawl Related Spwned",
+            "description": "Kill your enemies with GCN Controllers",
+            "__v": 6,
+            "dateCreated": "2015-05-07T00:52:42.760Z",
+            "messages": [],
+            "all_kills": [],
+            "players": [
+                {
+                    "killed": [],
+                    "isAlive": true,
+                    "dateCreated": "2015-05-08T04:37:45.815Z",
+                    "_id": "554c3d9980f70334099d27b9",
+                    "user_id": "55487085a0608480245f0693"
+                }
+            ]
+        }
+    }
     
 ### Join Game
     
@@ -243,6 +247,8 @@ Game
         }
     }
 
+
+
 ### Delete Game
     
     DELETE /api/game/:id
@@ -251,4 +257,64 @@ Game
 
     {
         TBD
+    }
+    
+Player
+=============
+
+### Player List
+    
+    GET /api/player/
+    
+**Supported Parameters**
+
+|   Name   | Description | Example |
+|:--------:| :-----------:|:-------------:|
+| where |User ID + Game ID|where={"user_id":"554ab15cdc","game_id":"55415cdd"}
+| count |True/False| count=true
+    
+**Response**
+
+    {
+        "message": "player list OK",
+        "data": [
+            {
+                "_id": "554cdaea7685f0154f471807",
+                "user_id": "554cd2279f6de9303d1a4310",
+                "game_id": "554ab75a9dfab5b206f15cdd",
+                "__v": 0,
+                "dateCreated": "2015-05-08T15:48:58.732Z",
+                "isAlive": true,
+                "killed": [],
+                "killer": null,
+                "target": null
+            }
+        ]
+    }
+   
+### Specific Player
+    
+    GET /api/player/:id
+    
+**Supported Parameters**
+
+|   Name   | Description | Example |
+|:--------:| :-----------:|:-----------:|
+| none |none|none
+    
+**Response**
+
+    {
+        "message": "player ID OK",
+        "data": {
+            "_id": "554cdaea7685f0154f471807",
+            "user_id": "554cd2279f6de9303d1a4310",
+            "game_id": "554ab75a9dfab5b206f15cdd",
+            "__v": 0,
+            "dateCreated": "2015-05-08T15:48:58.732Z",
+            "isAlive": true,
+            "killed": [],
+            "killer": null,
+            "target": null
+        }
     }
