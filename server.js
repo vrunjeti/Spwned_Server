@@ -376,11 +376,14 @@ messagePIDRoute.post(function(req, res) {
 	var sender_id  = mongoose.Types.ObjectId(req.params.id);
 	var recipient_id  = mongoose.Types.ObjectId(req.body.recipient_id);
 	var body = req.body.body;
-	var msg =  {
+	
+	var data = {
 		recipient_id : recipient_id,
 		sender_id : sender_id,
 		body : body
 	};
+
+	var msg = new Message(data);
 
 	msg.save(function(err){
 		if(err) { 
