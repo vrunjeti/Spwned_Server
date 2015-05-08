@@ -398,9 +398,12 @@ messagePIDRoute.post(function(req, res) {
 });
 
 messagePIDRoute.get(function(req, res) {
-	var sender_id  = mongoose.Types.ObjectId(req.params.id);
+	var player_id  = mongoose.Types.ObjectId(req.params.id);
 	var conditions = {
-		sender_id : sender_id
+		$or : {
+			[{ sender_id : player_id }],
+			[{ recipient_id : player_id }]
+		}
 	}
 
 	Message.find(conditions, function(err, target) {
@@ -417,7 +420,6 @@ messagePIDRoute.get(function(req, res) {
 messageIDRoute.get(function(req, res){
 
 });
-
 
 
 app.listen(port);
