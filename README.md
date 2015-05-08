@@ -16,6 +16,8 @@ Backend for Spwned, CS498RK Final Project
   - [Player List](#player-list)
   - [Specific Player](#specific-player)
   - [Report Kill](#report-kill)
+- [Message] (#message)
+  - [Message List] (#message-list)
 
 
 Setting Up
@@ -378,5 +380,35 @@ Player
             "_id": "554d21e7e9c013ba522df533",
             "dateCreated": "2015-05-08T20:51:51.759Z",
             "timeOfKill": "2015-05-08T20:51:51.759Z"
+        }
+    }
+    
+Message
+=============
+### Message List
+    
+    GET /api/p/:id  // where id refers to playerid
+    
+**Supported Parameters**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| recipient_id | Player ID |   **Required** | 55487085a0608480245f0693 
+| sender_id | Player ID |   **Required** | 554d1908d3317a9b11a1a34c
+| body | String |   **Required** | "hello world"
+| predecessor | Message ID |   **Required** | 554d2b488277a3ca39b354be
+
+**Response**
+
+    {
+        "message": "message OK",
+        "data": {
+            "__v": 0,
+            "sender_id": "554d1908d3317a9b11a1a34c",
+            "body": "testing with id",
+            "_id": "554d2b488277a3ca39b354be",
+            "predecessor": null,
+            "dateCreated": "2015-05-08T21:31:52.583Z",
+            "recipient_id": "554ab75a9dfab5b206f15cdd"
         }
     }
