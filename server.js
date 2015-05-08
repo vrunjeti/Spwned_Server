@@ -54,6 +54,8 @@ var gameStartRoute = router.route('/game/:id/start');
 var playerRoute = router.route('/player');
 var playerIDRoute = router.route('/player/:id');
 var playerReportRoute = router.route('/player/:id/report');
+var messagePIDRoute = router.route('/message/p/:id');
+var messageIDRoute = router.route('/message/:id');
 //API Routes
 
 homeRoute.get(function(req, res) {
@@ -367,6 +369,52 @@ playerReportRoute.put(function(req, res) {
 	    }
 	});	
 });
+
+/* MESSAGE */
+
+messagePIDRoute.post(function(req, res) {
+	var sender_id  = mongoose.Types.ObjectId(req.params.id);
+	var recipient_id  = mongoose.Types.ObjectId(req.body.recipient_id);
+	var body = req.body.body;
+	var msg =  {
+		recipient_id : recipient_id,
+		sender_id : sender_id,
+		body : body
+	};
+
+	msg.save(function(err){
+		if(err) { 
+			res.status(404).json(jsonBody("404 Error","Message could not be saved"));
+			return;
+		}
+		else {
+			res.status(200).json(jsonBody('message OK',msg));
+		}
+	});
+
+});
+
+messagePIDRoute.get(function(req, res) {
+	var sender_id  = mongoose.Types.ObjectId(req.params.id);
+	var conditions = {
+		sender_id : sender_id
+	}
+
+	Message.find(conditions, function(err, target) {
+		if(err || !target) {
+			res.status(404).json(jsonBody("404 Error","Could not find Messages"));
+			return;
+		}
+		else {
+			res.status(200).json(jsonBody('message OK',target));
+		}
+	}).sort({ dateCreated : -1 });	// sort most recent first
+});
+
+messageIDRoute.get(function(req, res){
+
+});
+
 
 
 app.listen(port);
