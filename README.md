@@ -62,17 +62,92 @@ Authentication
         }
     }
 
-Game - TODO
+Game
 =============
 
 ### Game List
     
     GET /api/game
     
+**Supported Parameters**
+
+|   Name   | Description | Example |
+|:--------:| :-----------:|:-----------:|
+| where |Game ID|where={"_id":"554ab58e9dfab5b206f15cdc"}
+| count |True/False| count=true
+    
 **Response**
 
     {
-        TBD
+        "message": "game list OK",
+        "data": [
+            {
+                "_id": "554ab2479dfab5b206f15cdb",
+                "admin_id": "55487085a0608480245f0693",
+                "start_date": "1970-01-01T00:00:01.234Z",
+                "end_date": "1970-01-01T00:00:01.234Z",
+                "capacity": 15,
+                "title": "Brawl Related Spwned",
+                "description": "Kill your enemies with GCN Controllers",
+                "__v": 0,
+                "dateCreated": "2015-05-07T00:31:03.177Z",
+                "messages": [],
+                "all_kills": [],
+                "players": []
+            },
+            {
+                "_id": "554ab58e9dfab5b206f15cdc",
+                "admin_id": "55487085a0608480245f0693",
+                "start_date": "1970-01-01T00:00:01.234Z",
+                "end_date": "1970-01-01T00:00:01.234Z",
+                "capacity": 15,
+                "title": "Ice Breaker",
+                "description": "Meet your roommates at GT",
+                "__v": 0,
+                "dateCreated": "2015-05-07T00:45:02.075Z",
+                "messages": [],
+                "all_kills": [],
+                "players": []
+            }
+        ]
+    }
+    
+### Specific Game
+    
+    GET /api/game/:id
+    
+**Supported Parameters**
+
+|   Name   | Description | Example |
+|:--------:| :-----------:|:-----------:|
+| none |none|none
+    
+**Response**
+
+    {
+        "message": "game ID OK",
+        "data": {
+            "_id": "554ab75a9dfab5b206f15cdd",
+            "admin_id": "55487085a0608480245f0693",
+            "start_date": "1970-01-01T00:00:01.234Z",
+            "end_date": "1970-01-01T00:00:01.234Z",
+            "capacity": 15,
+            "title": "Brawl Related Spwned",
+            "description": "Kill your enemies with GCN Controllers",
+            "__v": 6,
+            "dateCreated": "2015-05-07T00:52:42.760Z",
+            "messages": [],
+            "all_kills": [],
+            "players": [
+                {
+                    "killed": [],
+                    "isAlive": true,
+                    "dateCreated": "2015-05-08T04:37:45.815Z",
+                    "_id": "554c3d9980f70334099d27b9",
+                    "user_id": "55487085a0608480245f0693"
+                }
+            ]
+        }
     }
     
 ### Create Game
@@ -86,7 +161,7 @@ Game - TODO
 |:--------:|:------:|:-----------:|:-----------:|
 | title | string |   **Required** | Brawl Related Spwned
 | description | string |   **Required** | Kill your enemies with GCN Controllers
-| admin_id | string |   **Required** | 554861e03f4f26151c70843d 
+| admin_id | string |   **Required** | 55487085a0608480245f0693 
 | start_date | string |   **Required** | TBD
 | end_date | string |   **Required** | TBD
 | capacity | number |   **Required** | 15
@@ -95,49 +170,70 @@ Game - TODO
 **Response**
 
     {
-        TBD
+        "message": "game creation OK",
+        "data": {
+            "__v": 0,
+            "admin_id": "55487085a0608480245f0693",
+            "start_date": "1970-01-01T00:00:01.234Z",
+            "end_date": "1970-01-01T00:00:01.234Z",
+            "capacity": 15,
+            "title": "Brawl Related Spwned",
+            "description": "Kill your enemies with GCN Controllers",
+            "_id": "554ab75a9dfab5b206f15cdd",
+            "dateCreated": "2015-05-07T00:52:42.760Z",
+            "messages": [],
+            "all_kills": [],
+            "players": []
+        }
     }
     
     
-### Game Info
-    
-    GET /api/game/:id
-    
-**Response**
-
-    {
-        TBD
-    }
     
 ### Join Game
     
-    POST /api/game/:id
+    PUT /api/game/:id/join  
     
 
 **Input**
 
 |   Name   |  Type  | Description | Example |
 |:--------:|:------:|:-----------:|:-----------:|
-| user_id | string |   **Required** | 554861e03f4f26151c70843d 
+| user_id | string |   **Required** | 55487085a0608480245f0693 
 
 **Response**
 
     {
-        TBD
+        "message": "game join OK",
+        "data": {
+            "user_id": "55487085a0608480245f0693",
+            "player_id": "554c3d9980f70334099d27b9",
+            "game_id": "554ab75a9dfab5b206f15cdd"
+        }
+    }
+    
+### Start Game
+    
+    PUT /api/game/:id/start
+    
+
+**Input**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| none | none |   none | none
+
+**Response**
+
+    {
+        "message": "game start OK",
+        "data": {
+            "game_id": "554ab75a9dfab5b206f15cdd"
+        }
     }
 
 ### Delete Game
     
     DELETE /api/game/:id
-    
-
-**Input**
-
-|   Name   |  Type  | Description | Example |
-|:--------:|:------:|:-----------:|:-----------:|
-| - | - |   No Expected Inputs  | -
-
-
 
 **Response**
 

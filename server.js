@@ -48,6 +48,9 @@ var homeRoute = router.route('/');
 var registerRoute = router.route('/register');
 var signinRoute = router.route('/signin');
 var gameRoute = router.route('/game');
+var gameIDRoute = router.route('/game/:id');
+var gameJoinRoute = router.route('/game/:id/join');
+var gameStartRoute = router.route('/game/:id/start');
 //API Routes
 
 homeRoute.get(function(req, res) {
@@ -74,6 +77,15 @@ function isSignInValid(req) {
 
 function jsonBody(msg,info) {
 	return {message: msg, data: info};
+}
+
+function findDuplicateUser(user_id,game) {
+	players = game.players;
+	for (i = 0; i < players.length; i++) {
+		if (players[i].user_id == user_id)
+			return false;
+	}
+	return true;
 }
 
 registerRoute.options(function(req, res) {
@@ -160,6 +172,7 @@ gameRoute.get(function(req, res) {
 		      res.status(404).json({message: "404 Error", data: err});
 		      return;
 		    }
+		    //console.log(games[0].messages.push(12134));
 		    res.status(200).json({message: "game list OK", data: games}); 
 		});	
 	}
@@ -179,6 +192,71 @@ gameRoute.post(function(req, res){
 		else {
 			res.status(201).json(jsonBody("game creation OK",newGame));
 		}
+	});
+});
+
+gameIDRoute.get(function(req, res) {
+	Game.findById(req.params.id, function(err, target) {
+	    if (err || !target) {
+	    	res.status(404).json(jsonBody("404 Error","Could not find Game"));
+	    	return;
+	    }
+	    else {
+			res.status(200).json(jsonBody('game ID OK',target));
+		}
+  });
+});
+
+gameJoinRoute.put(function(req, res) {
+	body = req.body;
+	Game.findById(req.params.id, function(err, game) {
+	    if (err || !game) {
+	    	res.status(404).json({'message':'404 Error','data':'Game ID does not exist'});
+	    	return;
+	    }
+	    else {
+	    	if (!findDuplicateUser(body.user_id,game)){
+	    		res.status(404).json(jsonBody("404 Error","User is already part of this game"));
+	    		return;
+	    	}
+	    	UserAccount.findById(body.user_id,function(err, user) {
+	    		if (err || !user) {
+	    			res.status(404).json(jsonBody("404 Error","Could not join. Invalid User"));
+	    			return;
+	    		}
+	    		else {
+	    			newPlayer = new Player({user_id:body.user_id});
+	    			game.players.push(newPlayer);
+	    			game.save(function(err) {
+	    				if (err) {
+			    			res.status(404).json(jsonBody("505 Error",err));
+			    		}
+	    				else {
+	    					user.games.push(mongoose.Types.ObjectId(game._id));
+			    			user.save();
+	    					info = {user_id:body.user_id,player_id:newPlayer._id,game_id:game._id,};
+	    					res.status(200).json(jsonBody('game join OK',info));
+	    				}
+	    			});
+	    		}
+	    	});
+	    }
+	});
+});
+
+gameStartRoute.put(function(req, res) {
+	body = req.body;
+	Game.findById(req.params.id, function(err, game) {
+	    if (err || !game) {
+	    	res.status(404).json({'message':'404 Error','data':'Game ID does not exist'});
+	    	return;
+	    }
+	    else {
+	    	//TODO
+	    	console.log("game start PUT needs LOGIC HERE");
+			info = {game_id:game._id,};
+	    	res.status(200).json(jsonBody('game start OK',info));
+	    }
 	});
 });
 

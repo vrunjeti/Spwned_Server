@@ -1,6 +1,7 @@
 var mongoose = require('mongoose'),
 	bcrypt = require('bcrypt'),
-    SALT_WORK_FACTOR = 10;
+    SALT_WORK_FACTOR = 10,
+    Schema = mongoose.Schema;
 
 var UserAccountSchema = new mongoose.Schema({
 	first_name: {type: String, required: true},
@@ -8,6 +9,7 @@ var UserAccountSchema = new mongoose.Schema({
 	email: {type: String, required: true, unique: true},
 	password: {type: String, required: true},
 	dateCreated: {type: Date, default: Date.now},
+	games: [{type:Schema.Types.ObjectId, ref:'Game'}],
 });
 
 UserAccountSchema.pre('save', function(next){ 
