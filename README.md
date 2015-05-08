@@ -1,6 +1,7 @@
 # Spwned_Server
 Backend for Spwned, CS498RK Final Project
 
+- [Settingup](#settingup)
 - [Authentication](#authentication)
   - [Registration](#registration)
   - [Sign In](#sign-in)
@@ -14,6 +15,16 @@ Backend for Spwned, CS498RK Final Project
 - [Player](#player)
   - [Player List](#player-list)
   - [Specific Player](#specific-player)
+
+
+
+Setting Up
+=============
+**Insall npm modules**
+    npm intall
+**Run the server
+    nodemon server.js
+    
 
  
 Authentication
