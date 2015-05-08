@@ -280,6 +280,21 @@ function prepareGame(game) {
 	return players;
 }
 
+function shuffle(array) {
+	var currentIndex = array.length, temporaryValue, randomIndex ;
+
+	// While there remain elements to shuffle...
+	while (0 !== currentIndex) {
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex -= 1;
+		temporaryValue = array[currentIndex];
+		array[currentIndex] = array[randomIndex];
+		array[randomIndex] = temporaryValue;
+	}
+	return array;
+}
+
+
 gameStartRoute.put(function(req, res) {
 	body = req.body;
 	Game.findById(req.params.id, function(err, game) {
@@ -288,14 +303,16 @@ gameStartRoute.put(function(req, res) {
 	    	return;
 	    }
 	    else {
+	    	game.players = shuffle(game.players);
 	    	prepareGame(game);
 	    	//game.markModified('players');
 	    	game.hasStarted = true;
+	    	game.markModified('players');
 	    	game.save();
 			info = {game_id:game._id,};
 	    	res.status(200).json(jsonBody('game start OK',info));
 	    }
-	});	
+	});
 });
 
 
@@ -351,12 +368,14 @@ playerReportRoute.put(function(req, res) {
 	    			targetPlayer.isAlive = false;
 	    			killer_id = mongoose.Types.ObjectId(killer._id);
 	    			target_id = mongoose.Types.ObjectId(targetPlayer._id);
+	    			new_killer_id = mongoose.Types.ObjectId(targetPlayer.target_id);
 	    			targetPlayer.killer_id = killer_id;
 	    			//targetPlayer.game_id = killer.game_id;
 	    			targetPlayer.save();
 	       			newKill = new Kill({killer_id:killer_id,target_id:target_id,game_id:killer.game_id});
 	       			newKill.save();
 	    			killer.killed.push(mongoose.Types.ObjectId(newKill._id));
+	    			killer.target_id = new_killer_id;
 	    			killer.markModified('killed');
 	    			killer.save();
 					res.status(200).json(jsonBody('player Report OK',newKill));
