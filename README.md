@@ -21,8 +21,11 @@ Backend for Spwned, CS498RK Final Project
 Setting Up
 =============
 **Insall npm modules**
+    
     npm intall
-**Run the server
+    
+**Run the server**
+    
     nodemon server.js
     
 
