@@ -393,7 +393,7 @@ Message
 
 |   Name   |  Type  | Description | Example |
 |:--------:|:------:|:-----------:|:-----------:|
-| recipient_id | Player ID |   **Required** | 55487085a0608480245f0693 
+| recipient_id | Player ID or NULL |   **Required** | 55487085a0608480245f0693 
 | sender_id | Player ID |   **Required** | 554d1908d3317a9b11a1a34c
 | body | String |   **Required** | "hello world"
 | predecessor | Message ID |   **Required** | 554d2b488277a3ca39b354be
