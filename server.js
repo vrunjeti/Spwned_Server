@@ -15,8 +15,8 @@ var bodyParser = require('body-parser');
 var router = express.Router();
 
 mongoose.connect('mongodb://alex:duh@ds031632.mongolab.com:31632/spwned_server');
-var conn = mongoose.connection;             
-conn.on('error', console.error.bind(console, 'connection error:'));  
+var conn = mongoose.connection;
+conn.on('error', console.error.bind(console, 'connection error:'));
 conn.once('open', function() {
 	console.log("√ Mongo Connection");
 	// UserAccount.findOne({name: 'jmar777' }, function(err, user) {
@@ -26,7 +26,7 @@ conn.once('open', function() {
  // 		if (err) throw err;
  // 		console.log('success');
  // 	});
- //   });                    
+ //   });
 });
 
 
@@ -53,10 +53,13 @@ var signinRoute = router.route('/signin');
 var gameRoute = router.route('/game');
 var gameIDRoute = router.route('/game/:id');
 var gameJoinRoute = router.route('/game/:id/join');
-var gameStartRoute = router.route('/game/:id/start');
-var playerRoute = router.route('/player');
+// var gameStartRoute = router.route('/game/:id/start');
+var playerRoute = router.route('/:gid/players');
 var playerIDRoute = router.route('/player/:id');
-var playerReportRoute = router.route('/player/:id/report');
+var playerReportRoute = router.route('/player/report');
+var adminDeleteGameRoute = router.route('/admin/delete_game');
+var adminRemovePlayerRoute = router.route('admin/remove_player');
+var adminStartGameRoute = router.route('admin/start_game');
 var messageGPIDRoute = router.route('/message/g/:gid/p/:pid');
 var messageGMIDRoute = router.route('/message/g/:gid/m/:mid');
 var announcementRoute = router.route('/announcement/g/:id');
@@ -69,8 +72,8 @@ homeRoute.get(function(req, res) {
 
 function isRegisterValid(req) {
 	body = req.body;
-	if (body.password=='' 		|| body.password == null 		|| 
-			body.email=='' 				|| body.email == null				|| 
+	if (body.password=='' 		|| body.password == null 		||
+			body.email=='' 				|| body.email == null				||
 			body.first_name == '' || body.first_name == null 	||
 			body.last_name == '' 	|| body.last_name == null			) {
 		return false;
@@ -139,7 +142,7 @@ signinRoute.options(function(req, res) {
 	res.end();
 });
 
-// sign in 
+// sign in
 signinRoute.post(function(req, res){
 	body = req.body;
 	if (!isSignInValid(req)) {
@@ -162,7 +165,7 @@ signinRoute.post(function(req, res){
 	        		else {
 						res.status(404).json(jsonBody("404 Error","Invalid Password"));
 	        		}
-	        	} 
+	        	}
 	    	});
 		}
 	});
@@ -179,10 +182,10 @@ gameRoute.get(function(req, res) {
 	req.query.where ? conditions = JSON.parse(req.query.where) : conditions = null;
 	req.query.count ? countBool = JSON.parse(req.query.count) : countBool  = false;
 
-	if (countBool === true) {	
+	if (countBool === true) {
 		Game.count({}, function( err, count){
-		    res.status(200).json({message: "OK", data: count}); 
-		});	
+		    res.status(200).json({message: "OK", data: count});
+		});
 	}
 	else {
 		Game.find(conditions, null, null, function(err, games) {
@@ -191,8 +194,8 @@ gameRoute.get(function(req, res) {
 		      return;
 		    }
 		    //console.log(games[0].messages.push(12134));
-		    res.status(200).json({message: "game list OK", data: games}); 
-		});	
+		    res.status(200).json({message: "game list OK", data: games});
+		});
 	}
 
 });
@@ -204,7 +207,7 @@ gameRoute.post(function(req, res){
 		res.status(404).json(jsonBody("404 Error","Invalid Input"));
 		return;
 	}
-	
+
 	var newGame = new Game(body);
 	newGame.save(function (err) {
 		if(err) {
@@ -257,7 +260,7 @@ gameJoinRoute.put(function(req, res) {
 	    		var newPlayer = new Player(data);
 	    		game.players.push(mongoose.Types.ObjectId(newPlayer._id));
 	    		newPlayer.save();
-	    		
+
 	    		game.save(function(err) {
 	    		if (err) {
 			    			res.status(505).json(jsonBody("505 Error",err));
@@ -265,7 +268,7 @@ gameJoinRoute.put(function(req, res) {
 	    				else {
 	    					user.games.push(mongoose.Types.ObjectId(game._id));
 			    			user.save();
-	    					
+
 	    					var info = {
 	    						user_id : body.user_id,
 	    						player_id : newPlayer._id,
@@ -321,48 +324,27 @@ function shuffle(array) {
 }
 
 
-gameStartRoute.put(function(req, res) {
-	body = req.body;
-	Game.findById(req.params.id, function(err, game) {
-	  if (err || !game) {
-    	res.status(404).json(jsonBody('404 Error','Game ID does not exist'));
-    	return;
-    }
-    else {
-    	game.players = shuffle(game.players);
-    	prepareGame(game);
-    	//game.markModified('players');
-    	game.hasStarted = true;
-    	game.markModified('players');
-    	game.save();
-			
-			var info = {
-				game_id:game._id,
-			};
-    	res.status(200).json(jsonBody('game start OK',info));
-    }
-	});
-});
-
-
 /*PLAYER */
 playerRoute.get(function(req, res) {
 	req.query.where ? conditions = JSON.parse(req.query.where) : conditions = null;
 	req.query.count ? countBool = JSON.parse(req.query.count) : countBool  = false;
+	// var game_id = req.params.gid;
 
-	if (countBool === true) {	
-		Player.count({}, function( err, count){
-		    res.status(200).json({message: "OK", data: count}); 
-		});	
+	if (countBool === true) {
+		Player.count({ game_id: req.params.gid }, function( err, count){
+		    res.status(200).json({message: "OK", data: count});
+		});
 	}
 	else {
-		Player.find(conditions, null, null, function(err, players) {
+		// not using where, using game_id directly
+		// Player.find(conditions, null, null, function(err, players)
+		Player.find({ game_id: req.params.gid }, null, null, function(err, players) {
 		    if (err) {
 		      res.status(404).json(jsonBody('404 Error',err));
 		      return;
 		    }
 		   	res.status(200).json(jsonBody('player list OK',players));
-		});	
+		});
 	}
 });
 
@@ -379,8 +361,9 @@ playerIDRoute.get(function(req, res) {
 });
 
 playerReportRoute.put(function(req, res) {
+	// var player_id = req.body.player_id
 	body = req.body;
-	Player.findById(req.params.id, function(err, killer) {
+	Player.findById(body.player_id, function(err, killer) {
 	    if (err || !killer) {
 	    	console.log(err);
 	    	res.status(404).json(jsonBody("404 Error","Could not find Killer"));
@@ -415,8 +398,87 @@ playerReportRoute.put(function(req, res) {
 	    		}
 	    	});
 	    }
-	});	
+	});
 });
+
+/* ADMIN */
+/**
+ *	TODO: create 'authentication' that checks for valid admin_id
+ */
+
+adminDeleteGameRoute.delete(function(req, res){
+	var adminId = req.query.admin_id;
+	var gameId = req.query.game_id;
+
+	Game.remove({ _id: gameId }, function(err, game) {
+		if(err) {
+			res.status(404).json(jsonBody("404 Error", "Could not delete game"));
+			return;
+		}
+		else {
+			res.status(200).json(jsonBody("Game deleted", game));
+		}
+	});
+});
+
+adminRemovePlayerRoute.delete(function(req, res){
+	var adminId = req.query.admin_id;
+	var playerId = req.query.player_id;
+	var gameId = req.query.game_id;
+
+	// find out if game has started, then delete user if game has not yet started
+	Game.findById(gameId, function(err, game){
+		if(err || !game){
+			res.status(404).json(jsonBody("404 Error", "Could not find game"));
+			return;
+		}
+		else {
+			if(game.hasStarted){
+				res.status(500).json(jsonBody("500 Internal Error", "Cannot delete player if game has already started"));
+				return;
+			}
+			// remove player from game only if game has not yet started
+			else {
+				Player.remove({ _id: playerId }, function(err, player) {
+					if(err) {
+						res.status(404).json(jsonBody("404 Error", "Could not remove player"));
+						return;
+					}
+					else {
+						res.status(200).json(jsonBody("Player removed", player));
+					}
+				});
+			}
+		}
+	});
+
+});
+
+adminStartGameRoute.put(function(req, res) {
+	var adminId = req.params.admin_id;
+	var gameId = req.params.game_id;
+
+	Game.findById(req.params.game_id, function(err, game) {
+	  if (err || !game) {
+    	res.status(404).json(jsonBody('404 Error','Game ID does not exist'));
+    	return;
+    }
+    else {
+    	game.players = shuffle(game.players);
+    	prepareGame(game);
+    	//game.markModified('players');
+    	game.hasStarted = true;
+    	game.markModified('players');
+    	game.save();
+
+			var info = {
+				game_id:game._id,
+			};
+    	res.status(200).json(jsonBody('game start OK',info));
+    }
+	});
+});
+
 
 /* MESSAGE */
 
@@ -448,7 +510,7 @@ messageGPIDRoute.post(function(req, res) {
 	var sender_id  = mongoose.Types.ObjectId(req.params.pid);
 	var recipient_id  = mongoose.Types.ObjectId(req.body.recipient_id);
 	var body = req.body.body;
-	
+
 	var data = {
 		game_id : game_id,
 		recipient_id : recipient_id,
@@ -459,7 +521,7 @@ messageGPIDRoute.post(function(req, res) {
 	var msg = new Message(data);
 
 	msg.save(function(err){
-		if(err) { 
+		if(err) {
 			res.status(404).json(jsonBody("404 Error","Message could not be saved"));
 			return;
 		}
@@ -526,7 +588,7 @@ announcementRoute.post(function(req, res){
 	var msg = new Message(data);
 
 	msg.save(function(err){
-		if(err) { 
+		if(err) {
 			res.status(404).json(jsonBody("404 Error","Announcement could not be saved"));
 			return;
 		}
@@ -540,4 +602,4 @@ announcementRoute.post(function(req, res){
 
 
 app.listen(port);
-console.log('Server running on port ' + port); 
+console.log('Server running on port ' + port);

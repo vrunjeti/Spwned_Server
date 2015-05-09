@@ -23,22 +23,22 @@ Backend for Spwned, CS498RK Final Project
 Setting Up
 =============
 **Install Dependencies**
-    
-    npm install
-    
-**Run Server**
-    
-    nodemon server.js
-    
 
- 
+    npm install
+
+**Run Server**
+
+    nodemon server.js
+
+
+
 Authentication
 =============
 
 ### Registration
-    
+
     POST /api/register
-    
+
 
 **Input**
 
@@ -66,9 +66,9 @@ Authentication
     }
 
 ### Sign In
-    
+
     POST /api/signin
-    
+
 
 **Input**
 
@@ -100,16 +100,16 @@ Game
 =============
 
 ### Game List
-    
+
     GET /api/game
-    
+
 **Supported Parameters**
 
 |   Name   | Description | Example |
 |:--------:| :-----------:|:-----------:|
 | where |Game ID|where={"_id":"554ab58e9dfab5b206f15cdc"}
 | count |True/False| count=true
-    
+
 **Response**
 
     {
@@ -145,11 +145,11 @@ Game
             }
         ]
     }
-    
+
 ### Create Game
-    
+
     POST /api/game
-    
+
 
 **Input**
 
@@ -157,7 +157,7 @@ Game
 |:--------:|:------:|:-----------:|:-----------:|
 | title | string |   **Required** | Brawl Related Spwned
 | description | string |   **Required** | Kill your enemies with GCN Controllers
-| admin_id | string |   **Required** | 55487085a0608480245f0693 
+| admin_id | string |   **Required** | 55487085a0608480245f0693
 | start_date | string |   **Required** | TBD
 | end_date | string |   **Required** | TBD
 | capacity | number |   **Required** | 15
@@ -182,17 +182,17 @@ Game
             "players": []
         }
     }
-    
+
 ### Specific Game
-    
+
     GET /api/game/:id
-    
+
 **Supported Parameters**
 
 |   Name   | Description | Example |
 |:--------:| :-----------:|:-----------:|
 | none |none|none
-    
+
 **Response**
 
     {
@@ -220,17 +220,17 @@ Game
             ]
         }
     }
-    
+
 ### Join Game
-    
-    PUT /api/game/:id/join  
-    
+
+    PUT /api/game/:id/join
+
 
 **Input**
 
 |   Name   |  Type  | Description | Example |
 |:--------:|:------:|:-----------:|:-----------:|
-| user_id | string |   **Required** | 55487085a0608480245f0693 
+| user_id | string |   **Required** | 55487085a0608480245f0693
 
 **Response**
 
@@ -242,11 +242,11 @@ Game
             "game_id": "554ab75a9dfab5b206f15cdd"
         }
     }
-    
+
 ### Start Game
-    
+
     PUT /api/game/:id/start
-    
+
 
 **Input**
 
@@ -266,7 +266,7 @@ Game
 
 
 ### Delete Game
-    
+
     DELETE /api/game/:id
 
 **Response**
@@ -274,21 +274,21 @@ Game
     {
         TBD
     }
-    
+
 Player
 =============
 
 ### Player List
-    
-    GET /api/player/
-    
+
+    GET /api/:game_id/players
+
 **Supported Parameters**
 
 |   Name   | Description | Example |
 |:--------:| :-----------:|:-------------:|
 | where |User ID + Game ID|where={"user_id":"554ab15cdc","game_id":"55415cdd"}
 | count |True/False| count=true
-    
+
 **Response**
 
     {
@@ -327,15 +327,15 @@ Player
     }
 
 ### Specific Player
-    
+
     GET /api/player/:id
-    
+
 **Supported Parameters**
 
 |   Name   | Description | Example |
 |:--------:| :-----------:|:-----------:|
 | none |none|none
-    
+
 **Response**
 
     {
@@ -360,15 +360,17 @@ Player
     }
 
 ### Report Kill
-    
-    PUT /api/player/:id/report
-    
+
+    PUT /api/player/report
+
 **Supported Parameters**
 
 |   Name   | Description | Example |
 |:--------:| :-----------:|:-----------:|
+| player_id | **required** | 55487085a0608480245f0693
 | secret_code |string|GYPB
-    
+
+
 **Response**
 
     {
@@ -382,18 +384,133 @@ Player
             "timeOfKill": "2015-05-08T20:51:51.759Z"
         }
     }
-    
-Message
+
+Admin
 =============
-### Message List
-    
-    GET /api/p/:id  // where id refers to playerid
-    
+### Delete Game
+
+    DELETE api/admin/delete_game
+
 **Supported Parameters**
 
 |   Name   |  Type  | Description | Example |
 |:--------:|:------:|:-----------:|:-----------:|
-| recipient_id | Player ID or NULL |   **Required** | 55487085a0608480245f0693 
+| admin_id | _id |   **Required** | 55487085a0608480245f0693
+| game_id | _id |   **Required** | 554d1908d3317a9b11a1a34c
+
+**Response**
+
+    {
+        "message": "game deleted",
+        "data": {
+            "_id": "554ab75a9dfab5b206f15cdd",
+            "admin_id": "55487085a0608480245f0693",
+            "start_date": "1970-01-01T00:00:01.234Z",
+            "end_date": "1970-01-01T00:00:01.234Z",
+            "capacity": 15,
+            "title": "Brawl Related Spwned",
+            "description": "Kill your enemies with GCN Controllers",
+            "__v": 6,
+            "dateCreated": "2015-05-07T00:52:42.760Z",
+            "messages": [],
+            "all_kills": [],
+            "players": [
+                {
+                    "killed": [],
+                    "isAlive": true,
+                    "dateCreated": "2015-05-08T04:37:45.815Z",
+                    "_id": "554c3d9980f70334099d27b9",
+                    "user_id": "55487085a0608480245f0693"
+                }
+            ]
+        }
+    }
+
+### Remove Player
+
+    DELETE api/admin/remove_player
+
+**Supported Parameters**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| admin_id | _id |   **Required** | 55487085a0608480245f0693
+| player_id | _id |   **Required** | 554d2b488277a3ca39b354be
+| game_id | _id |   **Required** | 554d1908d3317a9b11a1a34c
+
+**Response**
+
+    {
+        "message": "player removed",
+        "data": {
+            "_id": "554d1e383bad7b454a9a7259",
+            "user_id": "55487085a0608480245f0693",
+            "game_id": "554d1e0d3bad7b454a9a7258",
+            "__v": 4,
+            "dateCreated": "2015-05-08T20:36:08.361Z",
+            "secret_code": "HI8H",
+            "isAlive": true,
+            "killed": [
+                "554d20f7da2240bf507c6dc9",
+                "554d212fda2240bf507c6dca",
+                "554d21e0e9c013ba522df532",
+                "554d21e7e9c013ba522df533"
+            ],
+            "killer_id": null,
+            "target_id": "554d1e433bad7b454a9a725a"
+        }
+    }
+
+### Start Game
+
+    PUT api/admin/start_game
+
+**Supported Parameters**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| admin_id | _id |   **Required** | 55487085a0608480245f0693
+| game_id | _id |   **Required** | 554d1908d3317a9b11a1a34c
+
+**Response**
+
+    {
+        "message": "game start OK",
+        "data": {
+            "_id": "554ab75a9dfab5b206f15cdd",
+            "admin_id": "55487085a0608480245f0693",
+            "start_date": "1970-01-01T00:00:01.234Z",
+            "end_date": "1970-01-01T00:00:01.234Z",
+            "capacity": 15,
+            "title": "Brawl Related Spwned",
+            "description": "Kill your enemies with GCN Controllers",
+            "__v": 6,
+            "dateCreated": "2015-05-07T00:52:42.760Z",
+            "messages": [],
+            "all_kills": [],
+            "players": [
+                {
+                    "killed": [],
+                    "isAlive": true,
+                    "dateCreated": "2015-05-08T04:37:45.815Z",
+                    "_id": "554c3d9980f70334099d27b9",
+                    "user_id": "55487085a0608480245f0693"
+                }
+            ]
+        }
+    }
+
+Message
+=============
+### Message List
+
+    GET /api/p/:id  // where id refers to playerid
+
+**Supported Parameters**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| recipient_id | Player ID or NULL |   **Required** | 55487085a0608480245f0693
 | sender_id | Player ID |   **Required** | 554d1908d3317a9b11a1a34c
 | body | String |   **Required** | "hello world"
 | predecessor | Message ID |   **Required** | 554d2b488277a3ca39b354be
