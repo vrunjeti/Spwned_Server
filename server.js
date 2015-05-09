@@ -54,8 +54,9 @@ var gameStartRoute = router.route('/game/:id/start');
 var playerRoute = router.route('/player');
 var playerIDRoute = router.route('/player/:id');
 var playerReportRoute = router.route('/player/:id/report');
-var messagePIDRoute = router.route('/message/p/:id');
+var messageGPIDRoute = router.route('/message/g/:gid/p/:pid');
 var messageIDRoute = router.route('/message/:id');
+var announcementRoute = router.route('/announcement/g/:id');
 //API Routes
 
 homeRoute.get(function(req, res) {
@@ -391,12 +392,32 @@ playerReportRoute.put(function(req, res) {
 
 /* MESSAGE */
 
-messagePIDRoute.post(function(req, res) {
-	var sender_id  = mongoose.Types.ObjectId(req.params.id);
+// get the list of msgs that whose sender or recipient is current player
+messageGPIDRoute.get(function(req, res) {
+	var game_id = mongoose.Types.ObjectId(req.params.gid);
+	var player_id  = mongoose.Types.ObjectId(req.params.id);
+
+	Message.find({game_id: game_id}, function(err, target) {
+		if(err || !target) {
+			res.status(404).json(jsonBody("404 Error","Could not find Messages"));
+			return;
+		}
+		else {
+			res.status(200).json(jsonBody('message OK',target));
+		}
+	}).or([{ sender_id : player_id }, { recipient_id : player_id }])
+		.sort({ dateCreated : -1 });	// sort most recent first
+});
+
+// saves a new msg with current pleyer as a sender
+messageGPIDRoute.post(function(req, res) {
+	var game_id = mongoose.Types.ObjectId(req.params.gid);
+	var sender_id  = mongoose.Types.ObjectId(req.params.pid);
 	var recipient_id  = mongoose.Types.ObjectId(req.body.recipient_id);
 	var body = req.body.body;
 	
 	var data = {
+		game_id : game_id,
 		recipient_id : recipient_id,
 		sender_id : sender_id,
 		body : body
@@ -416,27 +437,53 @@ messagePIDRoute.post(function(req, res) {
 
 });
 
-messagePIDRoute.get(function(req, res) {
-	var player_id  = mongoose.Types.ObjectId(req.params.id);
+messageIDRoute.get(function(req, res){
+
+});
+
+announcementRoute.get(function(req, res){
+	var game_id = req.params.id;
 	var conditions = {
-		$or : {
-			[{ sender_id : player_id }],
-			[{ recipient_id : player_id }]
-		}
+		recipient_id : null,
+		game_id : game_id
 	}
 
 	Message.find(conditions, function(err, target) {
 		if(err || !target) {
-			res.status(404).json(jsonBody("404 Error","Could not find Messages"));
+			res.status(404).json(jsonBody("404 Error","Could not find announcements"));
 			return;
 		}
 		else {
-			res.status(200).json(jsonBody('message OK',target));
+			res.status(200).json(jsonBody('announcement OK',target));
 		}
-	}).sort({ dateCreated : -1 });	// sort most recent first
+	}).sort({ dateCreated : -1 });
 });
 
-messageIDRoute.get(function(req, res){
+announcementRoute.post(function(req, res){
+	var game_id = req.params.id;
+	var sender_id = req.body.adminid;
+	var recipient_id = null;
+	var body = req.body.body;
+
+
+	var data = {
+		game_id : game_id,
+		recipient_id : recipient_id,
+		sender_id : sender_id,
+		body : body
+	};
+
+	var msg = new Message(data);
+
+	msg.save(function(err){
+		if(err) { 
+			res.status(404).json(jsonBody("404 Error","Announcement could not be saved"));
+			return;
+		}
+		else {
+			res.status(200).json(jsonBody('announcement OK',msg));
+		}
+	});
 
 });
 
