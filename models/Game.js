@@ -10,6 +10,10 @@ var GameSchema = new mongoose.Schema({
 	all_kills: [{type: Schema.Types.ObjectId, ref:'Kill'}],
 	messages: [{type: Schema.Types.ObjectId, ref:'Message'}],
 	dateCreated: {type: Date, default: Date.now},
+	start_date: {type: Date, required: true},
+	end_date: {type: Date, required: true},
+	isFinished: {type: Boolean, default: false},
+	winners: [{type: Schema.Types.ObjectId, ref:'Player'}],
 });
 
 module.exports = mongoose.model('Game', GameSchema);

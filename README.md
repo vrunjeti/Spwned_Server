@@ -16,8 +16,8 @@ Backend for Spwned, CS498RK Final Project
   - [Player List](#player-list)
   - [Specific Player](#specific-player)
   - [Report Kill](#report-kill)
-- [Message] (#message)
-  - [Message List] (#message-list)
+- [Message](#message)
+  - [Message List](#message-list)
 
 
 Setting Up

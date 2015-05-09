@@ -55,9 +55,10 @@ var playerRoute = router.route('/player');
 var playerIDRoute = router.route('/player/:id');
 var playerReportRoute = router.route('/player/:id/report');
 var messageGPIDRoute = router.route('/message/g/:gid/p/:pid');
-var messageIDRoute = router.route('/message/:id');
+var messageGMIDRoute = router.route('/message/g/:gid/m/:mid');
 var announcementRoute = router.route('/announcement/g/:id');
 //API Routes
+
 
 homeRoute.get(function(req, res) {
 	res.json(jsonBody("Check if mongo has connected","Hello Spwned"));
@@ -65,9 +66,10 @@ homeRoute.get(function(req, res) {
 
 function isRegisterValid(req) {
 	body = req.body;
-	if (body.password=='' || body.password == null || body.email=='' || 
-		body.email == null|| body.first_name == '' || body.first_name == null ||
-		body.last_name == '' || body.last_name == null) {
+	if (body.password=='' 		|| body.password == null 		|| 
+			body.email=='' 				|| body.email == null				|| 
+			body.first_name == '' || body.first_name == null 	||
+			body.last_name == '' 	|| body.last_name == null			) {
 		return false;
 	}
 	return true;
@@ -392,10 +394,15 @@ playerReportRoute.put(function(req, res) {
 
 /* MESSAGE */
 
+messageGPIDRoute.options(function(req, res) {
+	res.writeHead(200);
+	res.end();
+});
+
 // get the list of msgs that whose sender or recipient is current player
 messageGPIDRoute.get(function(req, res) {
 	var game_id = mongoose.Types.ObjectId(req.params.gid);
-	var player_id  = mongoose.Types.ObjectId(req.params.id);
+	var player_id  = mongoose.Types.ObjectId(req.params.pid);
 
 	Message.find({game_id: game_id}, function(err, target) {
 		if(err || !target) {
@@ -437,8 +444,26 @@ messageGPIDRoute.post(function(req, res) {
 
 });
 
-messageIDRoute.get(function(req, res){
+messageGMIDRoute.options(function(req, res) {
+	res.writeHead(200);
+	res.end();
+});
 
+messageGMIDRoute.get(function(req, res){
+	var msg_id = req.params.mid;
+	Message.findById(msg_id, function(err, target) {
+		if(err) {
+			res.status(404).json(jsonBody("404 Error","Message not found"));
+		}
+		else {
+			res.status(200).json(jsonBody('message OK', target));
+		}
+	});
+});
+
+announcementRoute.options(function(req, res) {
+	res.writeHead(200);
+	res.end();
 });
 
 announcementRoute.get(function(req, res){
@@ -486,6 +511,7 @@ announcementRoute.post(function(req, res){
 	});
 
 });
+
 
 
 app.listen(port);
