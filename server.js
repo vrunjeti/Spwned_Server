@@ -1,4 +1,7 @@
-var express = require('express');
+"use strict";
+
+var app = express();
+
 var mongoose = require('mongoose');
 
 var UserAccount = require('./models/UserAccount');
@@ -26,7 +29,7 @@ conn.once('open', function() {
  //   });                    
 });
 
-var app = express();
+
 
 var port = process.env.PORT || 4000;
 
@@ -113,6 +116,7 @@ registerRoute.options(function(req, res) {
 	res.end();
 });
 
+// create a new user
 registerRoute.post(function(req, res){
 	if (!isRegisterValid(req)) {
 		res.status(404).json(jsonBody("404 Error","Invalid Input"));
@@ -129,11 +133,13 @@ registerRoute.post(function(req, res){
 	});
 });
 
+
 signinRoute.options(function(req, res) {
 	res.writeHead(200);
 	res.end();
 });
 
+// sign in 
 signinRoute.post(function(req, res){
 	body = req.body;
 	if (!isSignInValid(req)) {
@@ -188,15 +194,18 @@ gameRoute.get(function(req, res) {
 		    res.status(200).json({message: "game list OK", data: games}); 
 		});	
 	}
+
 });
 
+// create a new game
 gameRoute.post(function(req, res){
-	body = req.body;
-	if (false) {
+	var body = req.body;
+	if (!body) {
 		res.status(404).json(jsonBody("404 Error","Invalid Input"));
 		return;
 	}
-	newGame = new Game(body);
+	
+	var newGame = new Game(body);
 	newGame.save(function (err) {
 		if(err) {
 			res.status(404).json(jsonBody("404 Error",err));
@@ -207,47 +216,61 @@ gameRoute.post(function(req, res){
 	});
 });
 
+// get a specific game
 gameIDRoute.get(function(req, res) {
 	Game.findById(req.params.id, function(err, target) {
-	    if (err || !target) {
-	    	res.status(404).json(jsonBody("404 Error","Could not find Game"));
-	    	return;
-	    }
-	    else {
-			res.status(200).json(jsonBody('game ID OK',target));
+    if (err || !target) {
+    	res.status(404).json(jsonBody("404 Error","Could not find Game"));
+    	return;
+    }
+    else {
+		res.status(200).json(jsonBody('game ID OK',target));
 		}
   });
 });
 
+// join the game (as a player)
 gameJoinRoute.put(function(req, res) {
 	body = req.body;
 	Game.findById(req.params.id, function(err, game) {
-	    if (err || !game) {
-	    	res.status(404).json({'message':'404 Error','data':'Game ID does not exist'});
+	  if (err || !game) {
+	   	res.status(404).json({'message':'404 Error','data':'Game ID does not exist'});
+	    return;
+	  }
+	  else {
+	  	if (!findDuplicateUser(body.user_id,game)){
+	    	res.status(404).json(jsonBody("404 Error","User is already part of this game"));
 	    	return;
 	    }
-	    else {
-	    	if (!findDuplicateUser(body.user_id,game)){
-	    		res.status(404).json(jsonBody("404 Error","User is already part of this game"));
+
+	    UserAccount.findById(body.user_id,function(err, user) {
+	    	if (err || !user) {
+	    		res.status(404).json(jsonBody("404 Error","Could not join. Invalid User"));
 	    		return;
 	    	}
-	    	UserAccount.findById(body.user_id,function(err, user) {
-	    		if (err || !user) {
-	    			res.status(404).json(jsonBody("404 Error","Could not join. Invalid User"));
-	    			return;
+	    	else {
+	    		var data = {
+	    			user_id : body.user_id,
+	    			game_id : game._id,
+	    			secret_code : makeSecretCode()
 	    		}
-	    		else {
-	    			newPlayer = new Player({user_id:body.user_id,game_id:game._id,secret_code:makeSecretCode()});
-	    			game.players.push(mongoose.Types.ObjectId(newPlayer._id));
-	    			newPlayer.save();
-	    			game.save(function(err) {
-	    				if (err) {
+	    		var newPlayer = new Player(data);
+	    		game.players.push(mongoose.Types.ObjectId(newPlayer._id));
+	    		newPlayer.save();
+	    		
+	    		game.save(function(err) {
+	    		if (err) {
 			    			res.status(505).json(jsonBody("505 Error",err));
 			    		}
 	    				else {
 	    					user.games.push(mongoose.Types.ObjectId(game._id));
 			    			user.save();
-	    					info = {user_id:body.user_id,player_id:newPlayer._id,game_id:game._id,};
+	    					
+	    					var info = {
+	    						user_id : body.user_id,
+	    						player_id : newPlayer._id,
+	    						game_id : game._id,
+	    					};
 	    					res.status(200).json(jsonBody('game join OK',info));
 	    				}
 	    			});
@@ -301,20 +324,23 @@ function shuffle(array) {
 gameStartRoute.put(function(req, res) {
 	body = req.body;
 	Game.findById(req.params.id, function(err, game) {
-	    if (err || !game) {
-	    	res.status(404).json(jsonBody('404 Error','Game ID does not exist'));
-	    	return;
-	    }
-	    else {
-	    	game.players = shuffle(game.players);
-	    	prepareGame(game);
-	    	//game.markModified('players');
-	    	game.hasStarted = true;
-	    	game.markModified('players');
-	    	game.save();
-			info = {game_id:game._id,};
-	    	res.status(200).json(jsonBody('game start OK',info));
-	    }
+	  if (err || !game) {
+    	res.status(404).json(jsonBody('404 Error','Game ID does not exist'));
+    	return;
+    }
+    else {
+    	game.players = shuffle(game.players);
+    	prepareGame(game);
+    	//game.markModified('players');
+    	game.hasStarted = true;
+    	game.markModified('players');
+    	game.save();
+			
+			var info = {
+				game_id:game._id,
+			};
+    	res.status(200).json(jsonBody('game start OK',info));
+    }
 	});
 });
 
@@ -489,7 +515,6 @@ announcementRoute.post(function(req, res){
 	var sender_id = req.body.adminid;
 	var recipient_id = null;
 	var body = req.body.body;
-
 
 	var data = {
 		game_id : game_id,
