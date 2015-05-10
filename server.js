@@ -44,18 +44,22 @@ var signinRoute = router.route('/signin');
 var gameRoute = router.route('/game');
 var gameIDRoute = router.route('/game/:id');
 var gameJoinRoute = router.route('/game/:id/join');
-// var gameStartRoute = router.route('/game/:id/start');
+
 var playerRoute = router.route('/:gid/players');
 var playerIDRoute = router.route('/player/:id');
 var playerReportRoute = router.route('/player/report');
+
 var adminDeleteGameRoute = router.route('/admin/delete_game');
-var adminRemovePlayerRoute = router.route('admin/remove_player');
-var adminStartGameRoute = router.route('admin/start_game');
+var adminRemovePlayerRoute = router.route('/admin/remove_player');
+var adminStartGameRoute = router.route('/admin/start');
+
 var messageGPIDRoute = router.route('/message/g/:gid/p/:pid');
 var messageGMIDRoute = router.route('/message/g/:gid/m/:mid');
-var announcementRoute = router.route('/announcement/g/:id');
-//API Routes
 
+var announcementRoute = router.route('/announcement/g/:id');
+
+var killRoute = router.route('/kills');
+//API Routes
 
 homeRoute.get(function(req, res) {
 	res.json(jsonBody("Check if mongo has connected","Hello Spwned"));
@@ -144,6 +148,76 @@ function shuffle(array) {
 	return array;
 }
 
+function validatePlayerID(player_id, game_id, req, res, callback) {
+	Game.findById(game_id, function(err, game) {
+		if (err) {
+			callback(false,req,res);
+		}
+		else {
+			for (i = 0; i < game.players.length; i++) {
+				console.log(game.players[i] + " " + player_id);
+				if (game.players[i] == player_id) {
+					callback(true,req,res);
+					return;
+				}
+			}
+			callback(false,req,res);
+		}
+	});
+}
+
+function validateAdminID(admin_id, game_id, req, res, callback) {
+	Game.findById(game_id, function(err, game) {
+		if (err) {
+			callback(false,req,res);
+		}
+		else {
+			if (game.admin_id == admin_id)	
+				callback(true,req,res);
+			else
+				callback(false,req,res);
+		}
+	});
+}
+
+function validateUserID(game_id,user_id,res) {
+	Game.findById(game_id, function(err, game) {
+	    if (err || !game) {
+	    	return [null,null];
+	    }
+	    else {
+	    	Admin.find({user_id:user_id,game_id:game_id}, function(err,admin) {
+				//console.log(game.admin_id + " " + admin[0]._id);
+				if (admin && admin.length > 0) {
+					if (game.admin_id.equals(admin[0]._id)) {
+						game = game.toJSON()
+						game.admin_token = admin[0]._id;
+						game.player_token = null;
+						res.status(200).json(jsonBody("game select admin OK",game));
+						return;
+					}
+				}
+				else {
+					Player.find({user_id:user_id,game_id:game_id}, function(err,player) {
+						if (player && player.length > 0) {
+							for (i = 0; i < game.players.length; i++) {
+								if (game.players[i].equals(player[0]._id)) {
+									game = game.toJSON()
+									game.player_token = player[0]._id;
+									game.admin_token = null;
+									res.status(200).json(jsonBody("game select player OK",game));
+									return;
+								}
+							}
+						}
+						res.status(404).json(jsonBody("404 Error", "Could not find user_id"));
+						return;
+					});
+				}
+	    	});
+	    }
+	});
+}
 
 /*AUTHENTICATION */
 registerRoute.options(function(req, res) {
@@ -261,45 +335,6 @@ gameRoute.post(function(req, res){
 	});
 });
 
-
-function validatePlayerAndAdmin(game_id,user_id,res) {
-	Game.findById(game_id, function(err, game) {
-	    if (err || !game) {
-	    	return [null,null];
-	    }
-	    else {
-	    	Admin.find({user_id:user_id,game_id:game_id}, function(err,admin) {
-				//console.log(game.admin_id + " " + admin[0]._id);
-				if (admin && admin.length > 0) {
-					if (game.admin_id.equals(admin[0]._id)) {
-						game = game.toJSON()
-						game.admin_token = admin[0]._id;
-						game.player_token = null;
-						res.status(200).json(jsonBody("game select admin OK",game));
-						return;
-					}
-				}
-				else {
-					Player.find({user_id:user_id,game_id:game_id}, function(err,player) {
-						if (player && player.length > 0) {
-							for (i = 0; i < game.players.length; i++) {
-								if (game.players[i].equals(player[0]._id)) {
-									game = game.toJSON()
-									game.player_token = player[0]._id;
-									game.admin_token = null;
-									res.status(200).json(jsonBody("game select player OK",game));
-									return;
-								}
-							}
-						}
-						res.status(404).json(jsonBody("404 Error", "Could not find user_id"));
-						return;
-					});
-				}
-	    	});
-	    }
-	});
-}
 // get a specific game
 gameIDRoute.get(function(req, res) {
 	user_id = req.query.user_id;
@@ -307,7 +342,7 @@ gameIDRoute.get(function(req, res) {
     	res.status(404).json(jsonBody("404 Error","Please include a user_id"));
     	return;
 	}
-	validatePlayerAndAdmin(req.params.id,user_id,res);
+	validateUserID(req.params.id,user_id,res);
 });
 
 // join the game (as a player)
@@ -398,6 +433,15 @@ playerIDRoute.get(function(req, res) {
 });
 
 playerReportRoute.put(function(req, res) {
+	body = req.body;
+	validatePlayerID(body.player_id,body.game_id,req,res,playerReportCallBack);
+});
+
+function playerReportCallBack(valid,req,res) {
+	if (!valid) {
+	   	res.status(404).json(jsonBody("404 Error","Player ID Validiation Failed"));
+		return;
+	}
 	// var player_id = req.body.player_id
 	body = req.body;
 	Player.findById(body.player_id, function(err, killer) {
@@ -419,6 +463,7 @@ playerReportRoute.put(function(req, res) {
 	    			target_id = mongoose.Types.ObjectId(targetPlayer._id);
 	    			new_killer_id = mongoose.Types.ObjectId(targetPlayer.target_id);
 	    			targetPlayer.killer_id = killer_id;
+	    			targetPlayer.target_id = null;
 	    			//targetPlayer.game_id = killer.game_id;
 	    			targetPlayer.save();
 	       			newKill = new Kill({killer_id:killer_id,target_id:target_id,game_id:killer.game_id});
@@ -436,7 +481,7 @@ playerReportRoute.put(function(req, res) {
 	    	});
 	    }
 	});
-});
+}
 
 /* ADMIN */
 /**
@@ -457,6 +502,7 @@ adminDeleteGameRoute.delete(function(req, res){
 		}
 	});
 });
+
 
 adminRemovePlayerRoute.delete(function(req, res){
 	var adminId = req.query.admin_id;
@@ -492,29 +538,37 @@ adminRemovePlayerRoute.delete(function(req, res){
 });
 
 adminStartGameRoute.put(function(req, res) {
-	var adminId = req.params.admin_id;
-	var gameId = req.params.game_id;
-
-	Game.findById(req.params.game_id, function(err, game) {
-	  if (err || !game) {
-    	res.status(404).json(jsonBody('404 Error','Game ID does not exist'));
-    	return;
-    }
-    else {
-    	game.players = shuffle(game.players);
-    	prepareGame(game);
-    	//game.markModified('players');
-    	game.hasStarted = true;
-    	game.markModified('players');
-    	game.save();
-
-			var info = {
-				game_id:game._id,
-			};
-    	res.status(200).json(jsonBody('game start OK',info));
-    }
-	});
+	body = req.body;
+	validateAdminID(body.admin_id,body.game_id,req,res,adminStartGameCallBack);
 });
+
+function adminStartGameCallBack(valid,req,res) {
+	if (!valid) {
+	   	res.status(404).json(jsonBody("404 Error","Admin ID Validiation Failed"));
+		return;
+	}
+	body = req.body;
+	var gameId = body.game_id;
+
+	Game.findById(gameId, function(err, game) {
+	  if (err || !game) {
+	    	res.status(404).json(jsonBody('404 Error','Game ID does not exist'));
+	    	return;
+    	}
+    	else {
+	    	game.players = shuffle(game.players);
+	    	prepareGame(game);
+	    	game.hasStarted = true;
+	    	game.markModified('players');
+	    	game.save();
+
+				var info = {
+					game_id:game._id,
+				};
+	    	res.status(200).json(jsonBody('game start OK',info));
+	    }
+	});
+}
 
 
 /* MESSAGE */
@@ -635,6 +689,25 @@ announcementRoute.post(function(req, res){
 	});
 
 });
+
+
+killRoute.options(function(req, res) {
+	res.writeHead(200);
+	res.end();
+});
+
+killRoute.get(function(req, res){
+	Kill.find(req.query, function(err, kills) {
+		if(err || !kills) {
+			res.status(404).json(jsonBody("404 Error","Could not find kills"));
+			return;
+		}
+		else {
+			res.status(200).json(jsonBody('kill list OK',kills));
+		}
+	}).sort({ dateCreated : 1 });
+});
+
 
 
 
