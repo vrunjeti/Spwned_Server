@@ -434,7 +434,7 @@ Kill
 
 |   Name   |  Type  | Description | Example |
 |:--------:|:------:|:-----------:|:-----------:|
-| recipient_id | game_id |   Filter by game ID | 554ab75a9dfab5b206f15cdd 
+| game_id | string |   Filter by game ID | 554ab75a9dfab5b206f15cdd 
 
 
 **Response**
@@ -456,6 +456,37 @@ Kill
 
 User Account
 =============
+
+### User Account List
+
+    GET /api/user
+
+**Supported Parameters**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| none | none |   none | none 
+
+
+**Response**
+
+    {
+        "message": "kill list OK",
+        "data": [
+            {
+                "_id": "554ede7a257f221f2e9892c3",
+                "first_name": "Annie",
+                "last_name": "Wu",
+                "email": "anniewu@gt.com",
+                "password": "$2a$10$ebJar7CLndpY5Y91tmih/uedMeeNhA5AdIMcqSVyKyoqhIk5PVt7.",
+                "__v": 12,
+                "games": [
+                    "554fc9a0e94dafc55c7bf865"
+                ],
+                "dateCreated": "2015-05-10T04:28:42.872Z"
+            }
+        ]
+    }
 ### Specific User Account
 
     GET /api/user/:id

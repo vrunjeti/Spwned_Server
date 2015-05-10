@@ -60,7 +60,8 @@ var announcementRoute = router.route('/announcement/g/:id');
 
 var killRoute = router.route('/kills');
 
-var userAccountRoute = router.route('/user/:id');
+var userAccountRoute = router.route('/user');
+var userAccountIDRoute = router.route('/user/:id');
 //API Routes
 
 homeRoute.get(function(req, res) {
@@ -820,6 +821,18 @@ killRoute.get(function(req, res){
 
 /*USER ACCOUNT */
 userAccountRoute.get(function(req, res) {
+	UserAccount.find(null,function(err, users){
+		if (err || !users) {
+			res.status(500).json(jsonBody("500 Error","server error"));
+			return;
+		}
+		else {
+			res.status(200).json(jsonBody('kill list OK',users));
+		}
+	});
+});
+
+userAccountIDRoute.get(function(req, res) {
 	UserAccount.findById(req.params.id,function(err,user) {
 		if (err || !user) {
 			res.status(404).json(jsonBody("404 Error","Could not find User"));
