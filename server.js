@@ -680,13 +680,13 @@ function adminStartGameCallBack(valid,req,res) {
 
 /* MESSAGE */
 
-messageGPIDRoute.options(function(req, res) {
+messageUPIDRoute.options(function(req, res) {
 	res.writeHead(200);
 	res.end();
 });
 
 // get the list of msgs that whose sender or recipient is current player
-messageuPIDRoute.get(function(req, res) {
+messageUPIDRoute.get(function(req, res) {
 	var game_id = mongoose.Types.ObjectId(req.params.gid);
 	var player_id  = mongoose.Types.ObjectId(req.params.uid);
 
