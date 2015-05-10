@@ -141,7 +141,7 @@ function shuffle(array) {
 
 function validatePlayerID(player_id, game_id, req, res, callback) {
 	Game.findById(game_id, function(err, game) {
-		if (err) {
+		if (err || !game) {
 			callback(false,req,res);
 		}
 		else {
@@ -158,7 +158,7 @@ function validatePlayerID(player_id, game_id, req, res, callback) {
 
 function validateAdminID(admin_id, game_id, req, res, callback) {
 	Game.findById(game_id, function(err, game) {
-		if (err) {
+		if (err  || !game) {
 			callback(false,req,res);
 		}
 		else {
@@ -429,7 +429,19 @@ playerIDRoute.get(function(req, res) {
 
 playerReportRoute.put(function(req, res) {
 	body = req.body;
-	validatePlayerID(body.player_id,body.game_id,req,res,playerReportCallBack);
+	Game.findById(body.game_id, function(err, game){
+		if(err || !game){
+			res.status(404).json(jsonBody("404 Error", "Could not find game"));
+			return;
+		}
+		else {
+			if(!game.hasStarted){
+				res.status(500).json(jsonBody("500 Internal Error", "Game hasn't started yet."));
+				return;
+			}
+			validatePlayerID(body.player_id,body.game_id,req,res,playerReportCallBack);
+		}
+	});
 });
 
 function checkGameStatus(game_id) {
@@ -456,7 +468,6 @@ function playerReportCallBack(valid,req,res) {
 	   	res.status(404).json(jsonBody("404 Error","Player ID Validiation Failed"));
 		return;
 	}
-	// var player_id = req.body.player_id
 	body = req.body;
 	Player.findById(body.player_id, function(err, killer) {
 	    if (err || !killer) {
@@ -501,19 +512,60 @@ function playerReportCallBack(valid,req,res) {
 
 /* ADMIN */
 adminDeleteGameRoute.delete(function(req, res){
-	var adminId = req.query.admin_id;
-	var gameId = req.query.game_id;
+	body = req.body;
+	validateAdminID(body.admin_id,body.game_id,req,res,adminDeleteGameCallBack);
+});
 
-	Game.remove({ _id: gameId }, function(err, game) {
-		if(err) {
+function adminDeleteGameCallBack(valid,req,res) {
+	if (!valid) {
+	   	res.status(404).json(jsonBody("404 Error","Admin ID Validiation Failed"));
+		return;
+	}
+	body = req.body;
+	var adminId = body.admin_id;
+	var gameId = body.game_id;
+
+	Game.findById(gameId, function(err, game) {
+		if(err || !game) {
 			res.status(404).json(jsonBody("404 Error", "Could not delete game"));
 			return;
 		}
 		else {
-			res.status(200).json(jsonBody("Game deleted", game));
+			Admin.findById({_id:game.admin_id}, function(err,admin) {
+				UserAccount.findById(admin.user_id, function(err,user) {
+					var gameIndex = user.games.indexOf(game._id);
+					user.games.splice(gameIndex,1);
+					user.save();
+					admin.remove();
+				});
+			});
+			Kill.find({game_id:gameId},function(err,kills) {
+				if (kills && kills.length > 0) {
+					for (i = 0; i < kills.length; i ++)
+						kills[i].remove();				
+				}
+			});
+			Message.find({game_id:gameId}, function(err,messages) {
+				if (messages && messages.length > 0) {
+					for (i = 0; i < messages.length; i ++)
+						messages[i].remove();				
+				}
+			});
+			for (i = 0; i < game.players.length; i++){
+				Player.findById(game.players[i], function(err, player) {
+					UserAccount.findById(player.user_id,function(err, user) {
+						var gameIndex = user.games.indexOf(game._id);
+						user.games.splice(gameIndex,1);
+						user.save();
+						player.remove();
+					});
+				});
+			}
+			game.remove();
+			res.status(200).json(jsonBody("Game deleted", "1"));
 		}
 	});
-});
+}
 
 
 adminRemovePlayerRoute.delete(function(req, res){
@@ -548,7 +600,6 @@ function adminRemovePlayerCallBack(valid,req,res) {
 						return;
 					}
 					else {
-						console.log(player);
 						var removeIndex = game.players.indexOf(playerId);
 						game.players.splice(removeIndex,1);
 						game.save();
@@ -568,7 +619,19 @@ function adminRemovePlayerCallBack(valid,req,res) {
 
 adminStartGameRoute.put(function(req, res) {
 	body = req.body;
-	validateAdminID(body.admin_id,body.game_id,req,res,adminStartGameCallBack);
+	Game.findById(body.game_id, function(err, game){
+		if(err || !game){
+			res.status(404).json(jsonBody("404 Error", "Could not find game"));
+			return;
+		}
+		else {
+			if(game.hasStarted){
+				res.status(500).json(jsonBody("500 Internal Error", "Game has already started"));
+				return;
+			}
+			validateAdminID(body.admin_id,body.game_id,req,res,adminStartGameCallBack);
+		}
+	});
 });
 
 function adminStartGameCallBack(valid,req,res) {

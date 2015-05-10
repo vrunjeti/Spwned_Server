@@ -369,29 +369,8 @@ Admin
 **Response**
 
     {
-        "message": "game deleted",
-        "data": {
-            "_id": "554ab75a9dfab5b206f15cdd",
-            "admin_id": "55487085a0608480245f0693",
-            "start_date": "1970-01-01T00:00:01.234Z",
-            "end_date": "1970-01-01T00:00:01.234Z",
-            "capacity": 15,
-            "title": "Brawl Related Spwned",
-            "description": "Kill your enemies with GCN Controllers",
-            "__v": 6,
-            "dateCreated": "2015-05-07T00:52:42.760Z",
-            "messages": [],
-            "all_kills": [],
-            "players": [
-                {
-                    "killed": [],
-                    "isAlive": true,
-                    "dateCreated": "2015-05-08T04:37:45.815Z",
-                    "_id": "554c3d9980f70334099d27b9",
-                    "user_id": "55487085a0608480245f0693"
-                }
-            ]
-        }
+        "message": "Game deleted",
+        "data": "1"
     }
 
 ### Remove Player
@@ -409,24 +388,8 @@ Admin
 **Response**
 
     {
-        "message": "player removed",
-        "data": {
-            "_id": "554d1e383bad7b454a9a7259",
-            "user_id": "55487085a0608480245f0693",
-            "game_id": "554d1e0d3bad7b454a9a7258",
-            "__v": 4,
-            "dateCreated": "2015-05-08T20:36:08.361Z",
-            "secret_code": "HI8H",
-            "isAlive": true,
-            "killed": [
-                "554d20f7da2240bf507c6dc9",
-                "554d212fda2240bf507c6dca",
-                "554d21e0e9c013ba522df532",
-                "554d21e7e9c013ba522df533"
-            ],
-            "killer_id": null,
-            "target_id": "554d1e433bad7b454a9a725a"
-        }
+        "message": "Player removed",
+        "data": "1"
     }
 
 
