@@ -53,7 +53,7 @@ var adminDeleteGameRoute = router.route('/admin/delete_game');
 var adminRemovePlayerRoute = router.route('/admin/remove_player');
 var adminStartGameRoute = router.route('/admin/start');
 
-var messageUPIDRoute = router.route('/message/g/:gid/u/:uid');
+var messageGUIDRoute = router.route('/message/g/:gid/u/:uid');
 var messageGMIDRoute = router.route('/message/g/:gid/m/:mid');
 
 var announcementRoute = router.route('/announcement/g/:id');
@@ -664,15 +664,15 @@ function adminStartGameCallBack(valid,req,res) {
 
 /* MESSAGE */
 
-messageGPIDRoute.options(function(req, res) {
+messageGUIDRoute.options(function(req, res) {
 	res.writeHead(200);
 	res.end();
 });
 
 // get the list of msgs that whose sender or recipient is current player
-messageuPIDRoute.get(function(req, res) {
+messageGUIDRoute.get(function(req, res) {
 	var game_id = mongoose.Types.ObjectId(req.params.gid);
-	var player_id  = mongoose.Types.ObjectId(req.params.uid);
+	var user_id  = mongoose.Types.ObjectId(req.params.uid);
 
 	Message.find({game_id: game_id}, function(err, target) {
 		if(err || !target) {
@@ -682,12 +682,12 @@ messageuPIDRoute.get(function(req, res) {
 		else {
 			res.status(200).json(jsonBody('message OK',target));
 		}
-	}).or([{ sender_id : player_id }, { recipient_id : player_id }])
+	}).or([{ sender_id : user_id }, { recipient_id : user_id }])
 		.sort({ dateCreated : -1 });	// sort most recent first
 });
 
 // saves a new msg with current pleyer as a sender
-messageUPIDRoute.post(function(req, res) {
+messageGUIDRoute.post(function(req, res) {
 	var game_id = mongoose.Types.ObjectId(req.params.gid);
 	var sender_id  = mongoose.Types.ObjectId(req.params.uid);
 	var recipient_id  = mongoose.Types.ObjectId(req.body.recipient_id);
