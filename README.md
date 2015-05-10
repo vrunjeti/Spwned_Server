@@ -308,12 +308,12 @@ Player
 
     PUT /api/player/report
 
-**Supported Parameters**
+**Input**
 
 |   Name   | Description | Example |
 |:--------:| :-----------:|:-----------:|
 | player_id | **required** | 55487085a0608480245f0693
-| game_id | **required** | 55487085a0608480245f0693
+| game_id | **required** | 554d1e0d3bad7b454a9a7258 
 | secret_code |string|GYPB
 
 
@@ -336,9 +336,9 @@ Admin
 
 ### Start Game
 
-    PUT api/admin/start_game
+    PUT api/admin/start
 
-**Supported Parameters**
+**Input**
 
 |   Name   |  Type  | Description | Example |
 |:--------:|:------:|:-----------:|:-----------:|
@@ -359,7 +359,7 @@ Admin
 
     DELETE api/admin/delete_game
 
-**Supported Parameters**
+**Input**
 
 |   Name   |  Type  | Description | Example |
 |:--------:|:------:|:-----------:|:-----------:|
@@ -398,7 +398,7 @@ Admin
 
     DELETE api/admin/remove_player
 
-**Supported Parameters**
+**Input**
 
 |   Name   |  Type  | Description | Example |
 |:--------:|:------:|:-----------:|:-----------:|
