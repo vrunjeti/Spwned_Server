@@ -22,6 +22,8 @@ Backend for Spwned, CS498RK Final Project
   - [Message List](#message-list)
 - [Kill](#kill)
   - [Kill List](#kill-list)
+- [User Account](#user-account)
+  - [Specific User Account](#specific-user-account)
 
 
 Setting Up
@@ -450,4 +452,35 @@ Kill
                 "timeOfKill": "2015-05-10T05:22:47.598Z"
             }
         ]
+    }
+
+User Account
+=============
+### Specific User Account
+
+    GET /api/user/:id
+
+**Supported Parameters**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| none | none |   none | none 
+
+
+**Response**
+
+    {
+        "message": "user ID OK",
+        "data": {
+            "_id": "554ede7a257f221f2e9892c3",
+            "first_name": "Annie",
+            "last_name": "Wu",
+            "email": "anniewu@gt.com",
+            "password": "$2a$10$ebJar7CLndpY5Y91tmih/uedMeeNhA5AdIMcqSVyKyoqhIk5PVt7.",
+            "__v": 12,
+            "games": [
+                "554fc9a0e94dafc55c7bf865"
+            ],
+            "dateCreated": "2015-05-10T04:28:42.872Z"
+        }
     }

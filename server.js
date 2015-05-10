@@ -59,6 +59,8 @@ var messageGMIDRoute = router.route('/message/g/:gid/m/:mid');
 var announcementRoute = router.route('/announcement/g/:id');
 
 var killRoute = router.route('/kills');
+
+var userAccountRoute = router.route('/user/:id');
 //API Routes
 
 homeRoute.get(function(req, res) {
@@ -797,6 +799,7 @@ announcementRoute.post(function(req, res){
 
 });
 
+/*KILLS*/
 killRoute.options(function(req, res) {
 	res.writeHead(200);
 	res.end();
@@ -814,6 +817,19 @@ killRoute.get(function(req, res){
 	}).sort({ dateCreated : 1 });
 });
 
+
+/*USER ACCOUNT */
+userAccountRoute.get(function(req, res) {
+	UserAccount.findById(req.params.id,function(err,user) {
+		if (err || !user) {
+			res.status(404).json(jsonBody("404 Error","Could not find User"));
+			return;
+		}
+		else {
+			res.status(200).json(jsonBody('user ID OK',user));
+		}
+	});
+});
 
 app.listen(port);
 console.log('Server running on port ' + port);
