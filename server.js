@@ -303,27 +303,36 @@ gameRoute.post(function(req, res){
 		return;
 	}
 	user_id = body.user_id;
-	delete body.user_id;
-	var newGame = new Game(body);
-	newGame.save(function (err) {
-		if(err) {
-			res.status(404).json(jsonBody("404 Error",err));
+	UserAccount.findById(user_id, function(err,user) {
+		if (err || !user) {
+			res.status(404).json(jsonBody("404 Error","Invalid user ID"));
+			return;
 		}
 		else {
-			newAdmin = new Admin({user_id:user_id,game_id:newGame._id});
-			newGame.admin_id = newAdmin._id;
-			newAdmin.save();
-			UserAccount.findById(user_id,function(err, user) {
-				user.games.push(mongoose.Types.ObjectId(newGame._id));
-				user.save(function(err) {
-					newGame.save(function (err) {
-						if (err)
-							res.status(505).json(jsonBody("505 Error",err));
-						else {
-							res.status(201).json(jsonBody("game creation OK",newGame));
-						}
+			delete body.user_id;
+			var newGame = new Game(body);
+			newGame.save(function (err) {
+				if(err) {
+					res.status(404).json(jsonBody("404 Error",err));
+					return;
+				}
+				else {
+					newAdmin = new Admin({user_id:user_id,game_id:newGame._id});
+					newGame.admin_id = newAdmin._id;
+					newAdmin.save();
+					UserAccount.findById(user_id,function(err, user) {
+						user.games.push(mongoose.Types.ObjectId(newGame._id));
+						user.save(function(err) {
+							newGame.save(function (err) {
+								if (err)
+									res.status(505).json(jsonBody("505 Error",err));
+								else {
+									res.status(201).json(jsonBody("game creation OK",newGame));
+								}
+							});
+						});
 					});
-				});
+				}
 			});
 		}
 	});
@@ -344,10 +353,15 @@ gameJoinRoute.put(function(req, res) {
 	body = req.body;
 	Game.findById(req.params.id, function(err, game) {
 	  if (err || !game) {
-	   	res.status(404).json({'message':'404 Error','data':'Game ID does not exist'});
+	    		res.status(404).json(jsonBody("404 Error","Cannot find game"));
 	    return;
 	  }
 	  else {
+	  	if (game.capacity <= game.players.length) {
+	    	res.status(404).json(jsonBody("404 Error","Game is full capacity"));
+		    return;
+	  	}
+
 	  	Player.find({user_id:body.user_id,game_id:game._id},function(err,players) {
 	  		if (players && players.length > 0) {
 	    		res.status(404).json(jsonBody("404 Error","User is already part of this game"));
@@ -457,6 +471,7 @@ function checkGameStatus(game_id) {
 					return;
 				game.winners.push(potentialWinners[0]);
 				game.isFinished = true;
+				game.end_date = Date(Date.now());
 				game.save();
 			});
 		}
@@ -651,6 +666,7 @@ function adminStartGameCallBack(valid,req,res) {
 	    	game.players = shuffle(game.players);
 	    	prepareGame(game);
 	    	game.hasStarted = true;
+	    	game.start_date = Date(Date.now());
 	    	game.markModified('players');
 	    	game.save();
 			var info = {

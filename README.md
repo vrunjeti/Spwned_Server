@@ -153,8 +153,6 @@ Game
 | title | string |   **Required** | Brawl Related Spwned
 | description | string |   **Required** | Kill your enemies with GCN Controllers
 | user_id | string |   **Required** | 55487085a0608480245f0693
-| start_date | string |   **Required** | TBD
-| end_date | string |   **Required** | TBD
 | capacity | number |   **Required** | 15
 
 
@@ -163,15 +161,16 @@ Game
     {
         "message": "game creation OK",
         "data": {
+            "admin_id": "554fc9a0e94dafc55c7bf866",
             "__v": 0,
-            "admin_id": "55487085a0608480245f0693",
-            "start_date": "1970-01-01T00:00:01.234Z",
-            "end_date": "1970-01-01T00:00:01.234Z",
-            "capacity": 15,
-            "title": "Brawl Related Spwned",
-            "description": "Kill your enemies with GCN Controllers",
-            "_id": "554ab75a9dfab5b206f15cdd",
-            "dateCreated": "2015-05-07T00:52:42.760Z",
+            "capacity": 2,
+            "title": "Annie's big Day",
+            "description": "Tag each other with pillows!",
+            "_id": "554fc9a0e94dafc55c7bf865",
+            "isFinished": false,
+            "hasStarted": false,
+            "winners": [],
+            "dateCreated": "2015-05-10T21:12:00.198Z",
             "players": []
         }
     }

@@ -7,8 +7,8 @@ var GameSchema = new mongoose.Schema({
 	admin_id: {type: Schema.Types.ObjectId, ref:'Admin'},
 	capacity: {type: Number, required: true},
 	dateCreated: {type: Date, default: Date.now},
-	start_date: {type: Date, required: true},
-	end_date: {type: Date, required: true},
+	start_date: {type: Date},
+	end_date: {type: Date},
 	winners: [{type: Schema.Types.ObjectId, ref:'Player'}],
 
 	//time booleans
