@@ -53,7 +53,7 @@ var adminDeleteGameRoute = router.route('/admin/delete_game');
 var adminRemovePlayerRoute = router.route('/admin/remove_player');
 var adminStartGameRoute = router.route('/admin/start');
 
-var messageGPIDRoute = router.route('/message/g/:gid/p/:pid');
+var messageUPIDRoute = router.route('/message/g/:gid/u/:uid');
 var messageGMIDRoute = router.route('/message/g/:gid/m/:mid');
 
 var announcementRoute = router.route('/announcement/g/:id');
@@ -686,9 +686,9 @@ messageGPIDRoute.options(function(req, res) {
 });
 
 // get the list of msgs that whose sender or recipient is current player
-messageGPIDRoute.get(function(req, res) {
+messageuPIDRoute.get(function(req, res) {
 	var game_id = mongoose.Types.ObjectId(req.params.gid);
-	var player_id  = mongoose.Types.ObjectId(req.params.pid);
+	var player_id  = mongoose.Types.ObjectId(req.params.uid);
 
 	Message.find({game_id: game_id}, function(err, target) {
 		if(err || !target) {
@@ -703,9 +703,9 @@ messageGPIDRoute.get(function(req, res) {
 });
 
 // saves a new msg with current pleyer as a sender
-messageGPIDRoute.post(function(req, res) {
+messageUPIDRoute.post(function(req, res) {
 	var game_id = mongoose.Types.ObjectId(req.params.gid);
-	var sender_id  = mongoose.Types.ObjectId(req.params.pid);
+	var sender_id  = mongoose.Types.ObjectId(req.params.uid);
 	var recipient_id  = mongoose.Types.ObjectId(req.body.recipient_id);
 	var body = req.body.body;
 
