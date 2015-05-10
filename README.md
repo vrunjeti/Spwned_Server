@@ -23,6 +23,7 @@ Backend for Spwned, CS498RK Final Project
 - [Kill](#kill)
   - [Kill List](#kill-list)
 - [User Account](#user-account)
+  - [User Account List](#user-account-list)
   - [Specific User Account](#specific-user-account)
 
 
