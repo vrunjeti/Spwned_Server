@@ -1,5 +1,6 @@
-"use strict";
+//"use strict";
 
+var express = require('express');
 var app = express();
 
 var mongoose = require('mongoose');
@@ -19,17 +20,7 @@ var conn = mongoose.connection;
 conn.on('error', console.error.bind(console, 'connection error:'));
 conn.once('open', function() {
 	console.log("√ Mongo Connection");
-	// UserAccount.findOne({name: 'jmar777' }, function(err, user) {
- //    if (err) throw err;
- // 	var admin = new Admin({userId:user._id});
- // 	admin.save(function(err) {
- // 		if (err) throw err;
- // 		console.log('success');
- // 	});
- //   });
 });
-
-
 
 var port = process.env.PORT || 4000;
 
@@ -113,6 +104,47 @@ function makeSecretCode()
     return secret;
 }
 
+function setTargetForPlayer(player_id,target_id) {
+	Player.findById(player_id, function(err, player) {
+	    if (err || !player) {
+	    	res.status(505).json(jsonBody("505 Error",err));
+	    	return;
+	    }
+	    else {
+	    	player.target_id = mongoose.Types.ObjectId(target_id);
+	    	player.save();
+		}
+	});
+}
+
+function prepareGame(game) {
+	players = game.players;
+	len = players.length;
+	target = 1;
+	for(i = 0; i < len; i++) {
+		setTargetForPlayer(players[i],players[target]);
+		target++;
+		if (target == len)
+			target = 0;
+	}
+	return players;
+}
+
+function shuffle(array) {
+	var currentIndex = array.length, temporaryValue, randomIndex ;
+
+	// While there remain elements to shuffle...
+	while (0 !== currentIndex) {
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex -= 1;
+		temporaryValue = array[currentIndex];
+		array[currentIndex] = array[randomIndex];
+		array[randomIndex] = temporaryValue;
+	}
+	return array;
+}
+
+
 /*AUTHENTICATION */
 registerRoute.options(function(req, res) {
 	res.writeHead(200);
@@ -178,6 +210,7 @@ gameRoute.options(function(req, res) {
 	res.end();
 });
 
+//game list
 gameRoute.get(function(req, res) {
 	req.query.where ? conditions = JSON.parse(req.query.where) : conditions = null;
 	req.query.count ? countBool = JSON.parse(req.query.count) : countBool  = false;
@@ -193,7 +226,6 @@ gameRoute.get(function(req, res) {
 		      res.status(404).json({message: "404 Error", data: err});
 		      return;
 		    }
-		    //console.log(games[0].messages.push(12134));
 		    res.status(200).json({message: "game list OK", data: games});
 		});
 	}
@@ -207,29 +239,75 @@ gameRoute.post(function(req, res){
 		res.status(404).json(jsonBody("404 Error","Invalid Input"));
 		return;
 	}
-
+	user_id = body.user_id;
+	delete body.user_id;
 	var newGame = new Game(body);
 	newGame.save(function (err) {
 		if(err) {
 			res.status(404).json(jsonBody("404 Error",err));
 		}
 		else {
-			res.status(201).json(jsonBody("game creation OK",newGame));
+			newAdmin = new Admin({user_id:user_id,game_id:newGame._id});
+			newGame.admin_id = newAdmin._id;
+			newAdmin.save();
+			newGame.save(function (err) {
+				if (err)
+					res.status(505).json(jsonBody("505 Error",err));
+				else {
+					res.status(201).json(jsonBody("game creation OK",newGame));
+				}
+			});
 		}
 	});
 });
 
+
+function validatePlayerAndAdmin(game_id,user_id,res) {
+	Game.findById(game_id, function(err, game) {
+	    if (err || !game) {
+	    	return [null,null];
+	    }
+	    else {
+	    	Admin.find({user_id:user_id,game_id:game_id}, function(err,admin) {
+				//console.log(game.admin_id + " " + admin[0]._id);
+				if (admin && admin.length > 0) {
+					if (game.admin_id.equals(admin[0]._id)) {
+						game = game.toJSON()
+						game.admin_token = admin[0]._id;
+						game.player_token = null;
+						res.status(200).json(jsonBody("game select admin OK",game));
+						return;
+					}
+				}
+				else {
+					Player.find({user_id:user_id,game_id:game_id}, function(err,player) {
+						if (player && player.length > 0) {
+							for (i = 0; i < game.players.length; i++) {
+								if (game.players[i].equals(player[0]._id)) {
+									game = game.toJSON()
+									game.player_token = player[0]._id;
+									game.admin_token = null;
+									res.status(200).json(jsonBody("game select player OK",game));
+									return;
+								}
+							}
+						}
+						res.status(404).json(jsonBody("404 Error", "Could not find user_id"));
+						return;
+					});
+				}
+	    	});
+	    }
+	});
+}
 // get a specific game
 gameIDRoute.get(function(req, res) {
-	Game.findById(req.params.id, function(err, target) {
-    if (err || !target) {
-    	res.status(404).json(jsonBody("404 Error","Could not find Game"));
+	user_id = req.query.user_id;
+	if (!user_id) {
+    	res.status(404).json(jsonBody("404 Error","Please include a user_id"));
     	return;
-    }
-    else {
-		res.status(200).json(jsonBody('game ID OK',target));
-		}
-  });
+	}
+	validatePlayerAndAdmin(req.params.id,user_id,res);
 });
 
 // join the game (as a player)
@@ -282,47 +360,6 @@ gameJoinRoute.put(function(req, res) {
 	    }
 	});
 });
-
-function setTargetForPlayer(player_id,target_id) {
-	Player.findById(player_id, function(err, player) {
-	    if (err || !player) {
-	    	res.status(505).json(jsonBody("505 Error",err));
-	    	return;
-	    }
-	    else {
-	    	player.target_id = mongoose.Types.ObjectId(target_id);
-	    	player.save();
-		}
-	});
-}
-
-function prepareGame(game) {
-	players = game.players;
-	len = players.length;
-	target = 1;
-	for(i = 0; i < len; i++) {
-		setTargetForPlayer(players[i],players[target]);
-		target++;
-		if (target == len)
-			target = 0;
-	}
-	return players;
-}
-
-function shuffle(array) {
-	var currentIndex = array.length, temporaryValue, randomIndex ;
-
-	// While there remain elements to shuffle...
-	while (0 !== currentIndex) {
-		randomIndex = Math.floor(Math.random() * currentIndex);
-		currentIndex -= 1;
-		temporaryValue = array[currentIndex];
-		array[currentIndex] = array[randomIndex];
-		array[randomIndex] = temporaryValue;
-	}
-	return array;
-}
-
 
 /*PLAYER */
 playerRoute.get(function(req, res) {
