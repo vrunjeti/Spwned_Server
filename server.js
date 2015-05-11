@@ -1,5 +1,3 @@
-//"use strict";
-
 var express = require('express');
 var app = express();
 
@@ -61,6 +59,7 @@ var messageGMIDRoute = router.route('/message/g/:gid/m/:mid');
 var announcementRoute = router.route('/announcement/g/:id');
 
 var killRoute = router.route('/kills');
+var killIDRoute = router.route('/kill/:id');
 
 var userAccountRoute = router.route('/user');
 var userAccountIDRoute = router.route('/user/:id');
@@ -845,6 +844,17 @@ killRoute.get(function(req, res){
 	}).sort({ dateCreated : 1 });
 });
 
+killIDRoute.get(function(req, res) {
+	Kill.findById(req.params.id,function(err,kill) {
+		if (err || !kill) {
+			res.status(404).json(jsonBody("404 Error","Could not find kill"));
+			return;
+		}
+		else {
+			res.status(200).json(jsonBody('kill ID OK',kill));
+		}
+	});
+});
 
 /*USER ACCOUNT */
 userAccountRoute.get(function(req, res) {

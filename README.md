@@ -26,6 +26,7 @@ Backend for Spwned, CS498RK Final Project
   - [Announcement List](#make-announcement)
 - [Kill](#kill)
   - [Kill List](#kill-list)
+  - [Specific Kill](#specific-kill)
 - [User Account](#user-account)
   - [User Account List](#user-account-list)
   - [Specific User Account](#specific-user-account)
@@ -559,6 +560,31 @@ Kill
             }
         ]
     }
+
+### Specific Kill
+
+    GET /api/kill/:id
+
+**Supported Parameters**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| none | none |   none | none
+
+**Response**
+
+        {
+            "message": "kill ID OK",
+            "data": {
+                "_id": "55500cf3587404156996fe28",
+                "killer_id": "5550288e5d6105132308b044",
+                "target_id": "55500c14587404156996fe26",
+                "game_id": "554fc0476e3656d856f1805b",
+                "__v": 0,
+                "dateCreated": "2015-05-11T01:59:15.885Z",
+                "timeOfKill": "2015-05-11T01:59:15.885Z"
+            }
+        }
 
 User Account
 =============
