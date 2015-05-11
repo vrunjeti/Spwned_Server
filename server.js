@@ -249,7 +249,7 @@ signinRoute.post(function(req, res){
 		return;
 	}
 	UserAccount.findOne({ email: body.email }, function(err, user) {
-		if (err) {
+		if (err || !user) {
 			res.status(404).json(jsonBody("404 Error","Email not in System"));
 		}
 		else {
