@@ -695,7 +695,12 @@ messageGUIDRoute.get(function(req, res) {
 	var game_id = mongoose.Types.ObjectId(req.params.gid);
 	var user_id  = mongoose.Types.ObjectId(req.params.uid);
 
-	Message.find({game_id: game_id}, function(err, target) {
+	var conditions = {
+		game_id: game_id,
+		recipient_id: {'$ne': null}
+	}
+
+	Message.find(conditions, function(err, target) {
 		if(err || !target) {
 			res.status(404).json(jsonBody("404 Error","Could not find Messages"));
 			return;
