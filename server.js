@@ -205,7 +205,7 @@ function validateUserID(game_id,user_id,res) {
 								}
 							}
 						}
-						res.status(404).json(jsonBody("404 Error", "Could not find user_id"));
+						res.status(404).json(jsonBody("404 Error", {hasStarted:game.hasStarted}));
 						return;
 					});
 				}
