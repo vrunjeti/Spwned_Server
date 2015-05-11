@@ -10,6 +10,8 @@ var Kill = require('./models/Kill');
 var Message = require('./models/Message');
 var Game = require('./models/Game');
 
+var Q = require('q');
+
 var bodyParser = require('body-parser');
 var router = express.Router();
 
@@ -717,35 +719,40 @@ messageGUIDRoute.post(function(req, res) {
 	var sender_id  = mongoose.Types.ObjectId(req.params.uid);
 	var recipient_id  = mongoose.Types.ObjectId(req.body.recipient_id);
 	var body = req.body.body;
-
 	if(!body) return res.status(404).json(jsonBody("404 Error","Message body required"));
 
 	Game.findById(game_id, function(err, game){
-		var index = game.players.indexOf(sender_id);
-		if(index < 0 || sender_id != game.admin_id._str) {
-			res.status(404).json(jsonBody("404 Error","User dose not belong to this game; Can't send message"));
-			return;
-		}
-		else {
-			var data = {
-				game_id : game_id,
-				recipient_id : recipient_id,
-				sender_id : sender_id,
-				body : body
-			};
+		var q1 = UserAccount.findById(sender_id).exec();
+		var q2 = UserAccount.findById(recipient_id).exec();
+		Q.all([ q1, q2 ]).spread(function(s, r){			
+			var s_index = s.games.indexOf(game_id);
+			var r_index = r.games.indexOf(game_id);
 
-			var msg = new Message(data);
+			if(s_index > -1 && r_index > -1) {
+				var data = {
+					game_id : game_id,
+					recipient_id : recipient_id,
+					sender_id : sender_id,
+					body : body
+				};
 
-			msg.save(function(err){
-				if(err) {
-					res.status(404).json(jsonBody("404 Error","Message could not be saved"));
-					return;
-				}
-				else {
-					res.status(200).json(jsonBody('message OK',msg));
-				}
-			});
-		}
+				var msg = new Message(data);
+
+				msg.save(function(err){
+					if(err) {
+						res.status(404).json(jsonBody("404 Error","Message could not be saved"));
+						return;
+					}
+					else {
+						res.status(200).json(jsonBody('message OK',msg));
+					}
+				});
+				return;
+			}
+			else {
+				res.status(404).json(jsonBody("404 Error","User dose not belong to this game; Can't send message"));
+			}
+		});
 	});
 });
 
@@ -801,7 +808,7 @@ announcementRoute.post(function(req, res){
 			res.status(404).json(jsonBody("404 Error","Announcement could not be saved"));
 			return;
 		}
-		else if(sender_id != game.admin_id._str) {
+		else if(sender_id != game.admin_id) {
 			res.status(404).json(jsonBody("404 Error","User does not have admin privilege"));
 			return;
 		}
