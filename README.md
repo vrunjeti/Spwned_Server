@@ -395,20 +395,43 @@ Admin
     }
 
 
-Message
+Messaging
 =============
 ### Message List
 
-    GET /api/p/:id  // where id refers to playerid
+    GET /api/message/g/:gid/u/:uid
 
 **Supported Parameters**
 
 |   Name   |  Type  | Description | Example |
 |:--------:|:------:|:-----------:|:-----------:|
-| recipient_id | Player ID or NULL |   **Required** | 55487085a0608480245f0693
-| sender_id | Player ID |   **Required** | 554d1908d3317a9b11a1a34c
+| none | none |   none | none 
+
+**Response**
+
+    {
+        "message": "message OK",
+        "data": {
+            "_id": "555019ae9b2c31c327e5be2c",
+            "game_id": "5550138153282a901810853f",
+            "sender_id": "5550138153282a9018108540",
+            "body": "msg test",
+            "__v": 0,
+            "dateCreated": "2015-05-11T02:53:34.186Z",
+            "recipient_id": "554febc837f76f7a2abdc681"
+        }
+    }
+
+### Send Message
+
+    POST /api/message/g/:gid/u/:uid
+
+**Supported Parameters**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| recipient_id | User ID |   **Required** | 55487085a0608480245f0693
 | body | String |   **Required** | "hello world"
-| predecessor | Message ID |   **Required** | 554d2b488277a3ca39b354be
 
 **Response**
 
@@ -416,13 +439,91 @@ Message
         "message": "message OK",
         "data": {
             "__v": 0,
-            "sender_id": "554d1908d3317a9b11a1a34c",
-            "body": "testing with id",
-            "_id": "554d2b488277a3ca39b354be",
-            "predecessor": null,
-            "dateCreated": "2015-05-08T21:31:52.583Z",
-            "recipient_id": "554ab75a9dfab5b206f15cdd"
+            "game_id": "5550138153282a901810853f",
+            "sender_id": "5550138153282a9018108540",
+            "body": "msg test",
+            "_id": "555020625e1f806333b1663c",
+            "dateCreated": "2015-05-11T03:22:10.821Z",
+            "recipient_id": "554ede7a257f221f2e9892c3"
         }
+    }
+
+### View Message
+
+    GET /api/message/g/:gid/m/:mid
+
+**Supported Parameters**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| none | none |   none | none 
+
+**Response**
+
+    {
+        "message": "message OK",
+        "data": {
+            "_id": "555020625e1f806333b1663c",
+            "game_id": "5550138153282a901810853f",
+            "sender_id": "5550138153282a9018108540",
+            "body": "wrong ",
+            "__v": 0,
+            "dateCreated": "2015-05-11T03:22:10.821Z",
+            "recipient_id": "554ede7a257f221f2e9892c3"
+        }
+    }
+
+### Make Announcement
+
+    POST /api/announcement/g/:gid
+
+**Supported Parameters**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| admin_id | User ID |   **Required** | 5550138153282a9018108540
+| body | String |   **Required** | "hello world"
+
+**Response**
+
+    {
+        "message": "announcement OK",
+        "data": {
+            "__v": 0,
+            "game_id": "5550138153282a901810853f",
+            "sender_id": "5550138153282a9018108540",
+            "body": "announcement",
+            "_id": "555021db5e1f806333b1663d",
+            "dateCreated": "2015-05-11T03:28:27.998Z",
+            "recipient_id": null
+        }
+    }
+
+### Announcement List
+
+    GET /api/announcement/g/:gid
+
+**Supported Parameters**
+
+|   Name   |  Type  | Description | Example |
+|:--------:|:------:|:-----------:|:-----------:|
+| none | none |   none | none 
+
+**Response**
+
+    {
+        "message": "announcement OK",
+        "data": [
+            {
+                "_id": "555021db5e1f806333b1663d",
+                "game_id": "5550138153282a901810853f",
+                "sender_id": "5550138153282a9018108540",
+                "body": "wrong ",
+                "__v": 0,
+                "dateCreated": "2015-05-11T03:28:27.998Z",
+                "recipient_id": "554ede7a257f221f2e9892c3"
+            }
+        ]
     }
 
 Kill

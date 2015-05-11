@@ -26,6 +26,7 @@ var port = process.env.PORT || 4000;
 
 var allowCrossDomain = function(req, res, next) {
 	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE");
 	res.header("Access-Control-Allow-Headers", "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept");
 	next();
 };
@@ -793,7 +794,6 @@ announcementRoute.post(function(req, res){
 			return;
 		}
 		else {
-			var sender_id = game.admin_id;
 			var data = {
 				game_id : game_id,
 				recipient_id : recipient_id,
