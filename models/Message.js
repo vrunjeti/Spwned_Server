@@ -9,7 +9,7 @@ var MessageSchema = new mongoose.Schema({
 });
 
 MessageSchema.path('body').validate(function(body) {
-	return title.length > 0;
+	return body.length > 0;
 }, 'Message cannot be blank');
 
 

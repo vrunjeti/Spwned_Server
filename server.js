@@ -713,6 +713,8 @@ messageGUIDRoute.post(function(req, res) {
 	var recipient_id  = mongoose.Types.ObjectId(req.body.recipient_id);
 	var body = req.body.body;
 
+	if(!body) return res.status(404).json(jsonBody("404 Error","Message body required"));
+
 	var data = {
 		game_id : game_id,
 		recipient_id : recipient_id,
@@ -758,6 +760,7 @@ announcementRoute.options(function(req, res) {
 
 announcementRoute.get(function(req, res){
 	var game_id = req.params.id;
+	var body = req.body.boby;
 	var conditions = {
 		recipient_id : null,
 		game_id : game_id
@@ -776,28 +779,43 @@ announcementRoute.get(function(req, res){
 
 announcementRoute.post(function(req, res){
 	var game_id = req.params.id;
-	var sender_id = req.body.adminid;
+	var sender_id = req.body.admin_id;
 	var recipient_id = null;
 	var body = req.body.body;
 
-	var data = {
-		game_id : game_id,
-		recipient_id : recipient_id,
-		sender_id : sender_id,
-		body : body
-	};
-
-	var msg = new Message(data);
-
-	msg.save(function(err){
+	Game.findById(game_id, function(err, game){
 		if(err) {
 			res.status(404).json(jsonBody("404 Error","Announcement could not be saved"));
 			return;
 		}
+		else if(sender_id != game.admin_id._str) {
+			res.status(404).json(jsonBody("404 Error","User does not have admin privilege"));
+			return;
+		}
 		else {
-			res.status(200).json(jsonBody('announcement OK',msg));
+			var sender_id = game.admin_id;
+			var data = {
+				game_id : game_id,
+				recipient_id : recipient_id,
+				sender_id : sender_id,
+				body : body
+			};
+
+			var msg = new Message(data);
+
+			msg.save(function(err){
+				if(err) {
+					res.status(404).json(jsonBody("404 Error","Announcement could not be saved"));
+					return;
+				}
+				else {
+					res.status(200).json(jsonBody('announcement OK',msg));
+				}
+			});
 		}
 	});
+
+	
 
 });
 
@@ -828,7 +846,7 @@ userAccountRoute.get(function(req, res) {
 			return;
 		}
 		else {
-			res.status(200).json(jsonBody('kill list OK',users));
+			res.status(200).json(jsonBody('user list OK',users));
 		}
 	});
 });
