@@ -716,25 +716,33 @@ messageGUIDRoute.post(function(req, res) {
 
 	if(!body) return res.status(404).json(jsonBody("404 Error","Message body required"));
 
-	var data = {
-		game_id : game_id,
-		recipient_id : recipient_id,
-		sender_id : sender_id,
-		body : body
-	};
-
-	var msg = new Message(data);
-
-	msg.save(function(err){
-		if(err) {
-			res.status(404).json(jsonBody("404 Error","Message could not be saved"));
+	Game.findById(game_id, function(err, game){
+		var index = game.players.indexOf(sender_id);
+		if(index < 0 || sender_id != game.admin_id._str) {
+			res.status(404).json(jsonBody("404 Error","User dose not belong to this game; Can't send message"));
 			return;
 		}
 		else {
-			res.status(200).json(jsonBody('message OK',msg));
+			var data = {
+				game_id : game_id,
+				recipient_id : recipient_id,
+				sender_id : sender_id,
+				body : body
+			};
+
+			var msg = new Message(data);
+
+			msg.save(function(err){
+				if(err) {
+					res.status(404).json(jsonBody("404 Error","Message could not be saved"));
+					return;
+				}
+				else {
+					res.status(200).json(jsonBody('message OK',msg));
+				}
+			});
 		}
 	});
-
 });
 
 messageGMIDRoute.options(function(req, res) {
