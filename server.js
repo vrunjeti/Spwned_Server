@@ -530,7 +530,7 @@ function playerReportCallBack(valid,req,res) {
 }
 
 /* ADMIN */
-adminDeleteGameRoute.delete(function(req, res){
+adminDeleteGameRoute.put(function(req, res){
 	body = req.body;
 	validateAdminID(body.admin_id,body.game_id,req,res,adminDeleteGameCallBack);
 });
@@ -587,7 +587,7 @@ function adminDeleteGameCallBack(valid,req,res) {
 }
 
 
-adminRemovePlayerRoute.delete(function(req, res){
+adminRemovePlayerRoute.put(function(req, res){
 	body = req.body;
 	validateAdminID(body.admin_id,body.game_id,req,res,adminRemovePlayerCallBack);
 });
